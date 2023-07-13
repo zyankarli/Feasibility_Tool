@@ -26,7 +26,6 @@ def get_data():
     pyam.iiasa.Connection(creds=iiasa_creds)
 
     connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
-    #other variables: 'Emissions|CO2', 'Primary Energy|Coal', 
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
