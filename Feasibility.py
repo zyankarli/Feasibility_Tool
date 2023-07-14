@@ -31,7 +31,7 @@ def get_data():
     pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
     pyam.iiasa.Connection()
 
-    connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
+    #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
