@@ -27,7 +27,7 @@ def get_data():
     #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
     #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
-    iiasa_creds = r".gitignore\iiasa_credentials.yml"
+    iiasa_creds = st.secrets['iiasa_creds']
     pyam.iiasa.Connection(creds=iiasa_creds)
 
     connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
