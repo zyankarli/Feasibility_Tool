@@ -35,7 +35,7 @@ def get_data():
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        creds = iiasa_creds,
+        #creds = iiasa_creds,
         scenario =['T34_550_feas_em',
                    'T34_550_feas_pr',
                    'T34_550_feas_ref',
