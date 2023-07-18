@@ -63,7 +63,7 @@ def get_data():
                 "Countries of Latin America and the Caribbean",
                 "Countries of the Middle East; Iran, Iraq, Israel, Saudi Arabia, Qatar, etc."]
     )      
-
+#TODO change to secdonary energy from primary
     #return data format of df
     return df
 
