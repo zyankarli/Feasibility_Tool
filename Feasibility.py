@@ -122,9 +122,45 @@ reductions_df.drop([2020, 2030, 2040], axis=1, inplace=True)
 #merge
 to_plot_df = pd.merge(left=to_plot_df, right=reductions_df, on=["model", "scenario", "region"])
 
+
+
+#STATEMENT
+#Until when is it feasible to phase out coal
+st.slider('What is feasible minimum of global coal use in 2030? (The current global coal use is about ' \
+          + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Primary Energy|Coal"].median()))) \
+          + "EJ)",
+          min_value = 48,
+          max_value = 145,    
+          value = 96,
+          step = 10, 
+          key = "coal_use_2030")
+
+
+#filter dataframe
+filter_df = pd.pivot(data=to_plot_df, index=['model','scenario', 'region', 'scenario_narrative', '2030_CO2_redu'], columns = 'year', values = 'Primary Energy|Coal').reset_index()
+filter_df = filter_df[filter_df[2030] >= st.session_state['coal_use_2030']]
+#to_plot_df.loc[(to_plot_df["year"] == 2030) & (to_plot_df["Primary Energy|Coal"] >= st.session_state['coal_use_2030'])]
+#calculate "consequences" of input
+#earliest_net_zero_year = filter_df["year_netzero"].min()
+#PA_aligned = (filter_df["carbon_budget"].str.contains("1.5C").sum() > 0)
+
+if filter_df.empty:
+    st.write("Chosen values out of scenario space! Please chose another input combination.")
+# else:
+#     #OUTPUT
+#     col1, col2, col3 = st.columns(3)
+#     col1.metric("Earliest possible net-zero year:", earliest_net_zero_year)
+#     col2.metric("Is it possible to achieve the 2014 PA? ", PA_aligned)
+
+
+
+
+
+#UPDATE FIGURE
+
 #FIGURE 
 fig = go.Figure(px.strip(
-    to_plot_df[(to_plot_df['year'] == 2030)],
+    filter_df,
     x='scenario_narrative',
     y='2030_CO2_redu',
     color='model',
@@ -132,7 +168,7 @@ fig = go.Figure(px.strip(
 
 
 fig.add_trace(go.Box(
-    y = to_plot_df[(to_plot_df['year'] == 2030) & (to_plot_df["scenario_narrative"] == "Instit")]["2030_CO2_redu"],
+    y = filter_df[filter_df["scenario_narrative"] == "Instit"]["2030_CO2_redu"],
     name = "Instit",
     marker_color='grey',
     opacity=0.3,
@@ -141,7 +177,7 @@ fig.add_trace(go.Box(
 ))
 
 fig.add_trace(go.Box(
-    y = to_plot_df[(to_plot_df['year'] == 2030) & (to_plot_df["scenario_narrative"] == "Cost Effective")]["2030_CO2_redu"],
+    y = filter_df[filter_df["scenario_narrative"] == "Cost Effective"]["2030_CO2_redu"],
     name = "Cost Effective",
     marker_color='grey',
     opacity=0.3,
@@ -165,31 +201,3 @@ fig.update_layout(autosize=False,
 st.plotly_chart(fig, theme="streamlit")
 
 
-
-#STATEMENT
-#Until when is it feasible to phase out coal
-st.slider('What is the earliest year that a coal phase-out seems feasible?',
-                                2020, 2100, 2030,
-                                key = "year_coal_phaseout")
-#What change in energy consumption of transport sector is realistic until 2030?
-st.number_input('What is the maximum feasible reduction (%) in energy consumption of the transport sector until 2030?',
-                                          min_value = -0.2,
-                                          max_value = 0.25,
-                                          value = 0.0,
-                                          step = 0.01,  
-                                          key = "change_energy_transport")
-
-#filter dataframe
-filter_df = to_plot.loc[(to_plot["year_netcoal"] >= st.session_state['year_coal_phaseout'] ) & (to_plot["redu_FET"] >= st.session_state['change_energy_transport'])]
-#calculate "consequences" of input
-earliest_net_zero_year = filter_df["year_netzero"].min()
-PA_aligned = (filter_df["carbon_budget"].str.contains("1.5C").sum() > 0)
-
-
-if filter_df.empty:
-    st.write("Chosen values out of scenario space! Please chose another input combination.")
-else:
-    #OUTPUT
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Earliest possible net-zero year:", earliest_net_zero_year)
-    col2.metric("Is it possible to achieve the 2014 PA? ", PA_aligned)
