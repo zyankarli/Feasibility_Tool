@@ -10,7 +10,8 @@ import numpy as np
 
 st.set_page_config(
      page_title='Feasibility of climate mitigation scenarios',
-     initial_sidebar_state="collapsed")
+     initial_sidebar_state="collapsed",
+     layout="wide")
 
 #hide menu and footer
 hide_default_format = """
@@ -50,10 +51,13 @@ def get_data():
                   'Primary Energy|Coal',
                   'Primary Energy|Gas',
                   'Primary Energy',
+                  'Capacity|Electricity|Coal',
                   'Capacity|Electricity|Solar',
                   'Capacity|Electricity|Wind',
                   'Carbon Sequestration|CCS',
-                  'Carbon Sequestration|Land Use'
+                  'Carbon Sequestration|Land Use',
+                  'Secondary Energy|Electricity|Coal',
+                  'Secondary Energy|Electricity|Solar'
                   ],
         region=["World",
                 "North America; primarily the United States of America and Canada",
@@ -112,41 +116,94 @@ df["Share_Gas"] = df["Primary Energy|Gas"] / df["Primary Energy"]
 
 
 #GET DATA TO PLOT
+#filter
 to_plot_df = df[(df['year'].isin([2020, 2030, 2040])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_govem"])) & (df["region"] == "World")]
 
 #calculate reductions
-reductions_df = to_plot_df[["model", "scenario", "region", 'year', "Emissions|CO2"]]
+reductions_df = to_plot_df[["model", "scenario", "scenario_narrative", "region", 'year', "Emissions|CO2"]]
 reductions_df = pd.pivot(data=reductions_df, index=reductions_df.drop(['year', "Emissions|CO2"], axis=1).columns, columns = 'year', values = 'Emissions|CO2').reset_index()
 reductions_df["2030_CO2_redu"] = ( (reductions_df[2030] - reductions_df[2020]) / reductions_df[2020]) * -1 #multiplied with -1 to have positive values 
 reductions_df["2040_CO2_redu"] = ((reductions_df[2040] - reductions_df[2020]) / reductions_df[2020]) * -1 
 reductions_df.drop([2020, 2030, 2040], axis=1, inplace=True)
 
+#calculate capacities/usage for 2030
+coal_use_2030 = pd.pivot(data=to_plot_df, index=['model','scenario', 'region'], columns = 'year', values = 'Secondary Energy|Electricity|Coal').reset_index()[['model', 'scenario', 'region', 2030]]
+coal_use_2030.rename(columns={2030:"coal_use_2030"}, inplace=True)
+
+solar_use_2030 = pd.pivot(data=to_plot_df, index=['model','scenario', 'region'], columns = 'year', values = 'Secondary Energy|Electricity|Solar').reset_index()[['model', 'scenario', 'region', 2030]]
+solar_use_2030.rename(columns={2030:"solar_use_2030"}, inplace=True)
+
 #merge
-to_plot_df = pd.merge(left=to_plot_df, right=reductions_df, on=["model", "scenario", "region"])
+to_plot_df = pd.merge(left=reductions_df, right=coal_use_2030, on=["model", "scenario", "region"])
+to_plot_df = pd.merge(left=to_plot_df, right=solar_use_2030, on=["model", "scenario", "region"])
+
+# #make CO2 reduction longer for plotting purposes
+#reduce data
+to_plot_df = pd.melt(to_plot_df, id_vars=["model", 'scenario', 'region', 'scenario_narrative', 'coal_use_2030','solar_use_2030'],
+                    value_vars=["2030_CO2_redu", "2040_CO2_redu"],
+                    var_name='reduction_year', value_name='reduction_value')
 
 
 
 #STATEMENT
 #Until when is it feasible to phase out coal
-st.slider('What is feasible minimum of global coal use in 2030? (The current global coal use is about ' \
-          + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Primary Energy|Coal"].median()))) \
-          + "EJ)",
-          min_value = 48,
-          max_value = 145,    
-          value = 96,
-          step = 10, 
-          key = "coal_use_2030")
+col_l, col_m, col_r = st.columns(3)
+with col_m:
+    st.write("## Feasibility concerns")
+    st.slider('What is the feasible maximum of global coal use for electricity generation in 2030? (The current global coal use is about ' \
+            + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median()))) \
+            + "EJ)",
+            min_value = 1,
+            max_value = 25,
+            value = 1,
+            step = 5, 
+            key = "coal_use_2030")
+    st.slider('What is the feasible maximium of global solar power use for elecricity generation in 2030? (The current global coal use is about ' \
+            + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median()))) \
+            + "EJ)",
+              min_value = 5,
+              max_value = 40,
+              value = 40,
+              step = 5,
+              key = 'solar_use_2030')
 
 
 #filter dataframe
-filter_df = pd.pivot(data=to_plot_df, index=['model','scenario', 'region', 'scenario_narrative', '2030_CO2_redu', '2040_CO2_redu'], columns = 'year', values = 'Primary Energy|Coal').reset_index()
-filter_df = filter_df[filter_df[2030] >= st.session_state['coal_use_2030']]
-filter_df = pd.melt(filter_df, id_vars=["model", 'scenario', 'region', 'scenario_narrative', 2030],
-                    value_vars=["2030_CO2_redu", "2040_CO2_redu"],
-                    var_name='reduction_year', value_name='reduction_value')
+#old below
+# filter_df = pd.pivot(data=to_plot_df, index=['model','scenario', 'region', 'scenario_narrative', '2030_CO2_redu', '2040_CO2_redu'],
+#                      columns = 'year', values = 'Secondary Energy|Electricity|Coal').reset_index()
+# filter_df = filter_df[(filter_df[2030] >= st.session_state['coal_use_2030']) & \
+#                       (filter_df[])]
+# filter_df = pd.melt(filter_df, id_vars=["model", 'scenario', 'region', 'scenario_narrative', 2030],
+#                     value_vars=["2030_CO2_redu", "2040_CO2_redu"],
+#                     var_name='reduction_year', value_name='reduction_value')
 
-#calculate "consequences" of input
-#earliest_net_zero_year = filter_df["year_netzero"].min()
+filter_df = to_plot_df[(to_plot_df['coal_use_2030'] >= st.session_state['coal_use_2030']) &\
+                       (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030'])]
+
+
+
+#METRICS // calculate "consequences" of input
+#calculate year that each scenario hit's net zero
+netzero_df = df[df["Emissions|CO2"] <= 0].groupby(["model", "scenario", "region"])['year'].min().reset_index()
+netzero_df.rename(columns={"year": "year_netzero"}, inplace=True)
+#add to filter
+filter_df = pd.merge(left=filter_df, right=netzero_df, on=["model", "scenario", "region"])
+
+#required coal reduction compared to 2020 median in percent
+required_coal_reduction_2030 = round(
+    100 - \
+    (float(st.session_state['coal_use_2030']) / \
+          round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median())) *\
+          100))
+
+required_solar_upscale_2030 = round(
+    float(st.session_state['solar_use_2030']) / \
+          round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median())) *\
+          100)
+
+
+earliest_net_zero_year = filter_df["year_netzero"].min()
 #PA_aligned = (filter_df["carbon_budget"].str.contains("1.5C").sum() > 0)
 
 if filter_df.empty:
@@ -156,75 +213,85 @@ if filter_df.empty:
 #     col1, col2, col3 = st.columns(3)
 #     col1.metric("Earliest possible net-zero year:", earliest_net_zero_year)
 #     col2.metric("Is it possible to achieve the 2014 PA? ", PA_aligned)
+#only show in case not empty
+else:
+    #FIGURES
+    color_mapping = {
+        'AIM/CGE V2.2': "rgb(255, 0, 0)",
+        'COFFEE 1.5': "rgb(0, 255, 0)",
+        'GEM-E3_V2023': "rgb(0, 0, 255)",
+        'IMAGE 3.2': "rgb(255, 255, 0)",
+        'MESSAGEix-GLOBIOM_1.1': "rgb(255, 0, 255)",
+        'POLES ENGAGE': "rgb(0, 255, 255)",
+        'REMIND 3.0': "rgb(128, 0, 0)",
+        'WITCH 5.0': "rgb(0, 128, 0)"
+    }
 
+    # Map colors based on the "model" column
+    filter_df["color"] = filter_df["model"].map(color_mapping)
 
+    fig = make_subplots(rows=1, cols=len(filter_df["reduction_year"].unique()), shared_yaxes=True)
 
-
-
-#FIGURES
-color_mapping = {
-    'AIM/CGE V2.2': "rgb(255, 0, 0)",
-    'COFFEE 1.5': "rgb(0, 255, 0)",
-    'GEM-E3_V2023': "rgb(0, 0, 255)",
-    'IMAGE 3.2': "rgb(255, 255, 0)",
-    'MESSAGEix-GLOBIOM_1.1': "rgb(255, 0, 255)",
-    'POLES ENGAGE': "rgb(0, 255, 255)",
-    'REMIND 3.0': "rgb(128, 0, 0)",
-    'WITCH 5.0': "rgb(0, 128, 0)"
-}
-
-# Map colors based on the "model" column
-filter_df["color"] = filter_df["model"].map(color_mapping)
-
-fig = make_subplots(rows=1, cols=len(filter_df["reduction_year"].unique()), shared_yaxes=True)
-
-for i, year in enumerate(filter_df["reduction_year"].unique()):
-    box_trace = go.Box(
-        x=filter_df[(filter_df["reduction_year"] == year)]["scenario_narrative"],
-        y=filter_df[(filter_df["reduction_year"] == year)]["reduction_value"],
-        name="Boxplot",
-        boxpoints=False,
-         marker_color='grey',
-        opacity=0.3,
-        showlegend=False
-    )
-
-    fig.add_trace(box_trace, row=1, col=i + 1)
-
-    # Add subplot titles
-    fig.update_layout(
-        annotations=[dict(text=str(year), xref="x" + str(i + 1), yref="paper", x=0.5, y=1.1, showarrow=False) for i, year in enumerate(filter_df["reduction_year"].unique())]
-    )
-
-    # Create a scatterplot for each model
-    for model in filter_df["model"].unique():
-        scatter_trace = go.Scatter(
-            x=filter_df[(filter_df["reduction_year"] == year) & (filter_df["model"] == model)]["scenario_narrative"],
-            y=filter_df[(filter_df["reduction_year"] == year) & (filter_df["model"] == model)]["reduction_value"],
-            mode="markers",
-            name=model,
-            marker=dict(
-                color=color_mapping[model],
-                size=6
-            ),
-            showlegend=i==0,
-            legendgroup=model
+    for i, year in enumerate(filter_df["reduction_year"].unique()):
+        box_trace = go.Box(
+            x=filter_df[(filter_df["reduction_year"] == year)]["scenario_narrative"],
+            y=filter_df[(filter_df["reduction_year"] == year)]["reduction_value"],
+            name="Boxplot",
+            boxpoints=False,
+            marker_color='grey',
+            opacity=0.3,
+            showlegend=False
         )
 
-        fig.add_trace(scatter_trace, row=1, col=i + 1)
+        fig.add_trace(box_trace, row=1, col=i + 1)
 
-fig.update_layout(
-    title = go.layout.Title(
-        text="ENGAGE 2C scenarios <br><sup>Global CO2 reductions by 2030 and 2040</sup>",
-        xref="paper",
-        x=0),
-    xaxis=dict(title="Scenario Narrative", ),
-    yaxis=dict(title="Reduction Value"),
-    legend=dict(
-        traceorder="normal",
-        itemsizing="constant"
+        # Add subplot titles
+        fig.update_layout(
+            annotations=[dict(text=str(year), xref="x" + str(i + 1), yref="paper", x=0.5, y=1.1, showarrow=False) for i, year in enumerate(filter_df["reduction_year"].unique())]
+        )
+
+        # Create a scatterplot for each model
+        for model in filter_df["model"].unique():
+            scatter_trace = go.Scatter(
+                x=filter_df[(filter_df["reduction_year"] == year) & (filter_df["model"] == model)]["scenario_narrative"],
+                y=filter_df[(filter_df["reduction_year"] == year) & (filter_df["model"] == model)]["reduction_value"],
+                mode="markers",
+                name=model,
+                marker=dict(
+                    color=color_mapping[model],
+                    size=6
+                ),
+                showlegend=i==0,
+                legendgroup=model
+            )
+
+            fig.add_trace(scatter_trace, row=1, col=i + 1)
+
+    fig.update_layout(
+        title = go.layout.Title(
+            text="ENGAGE 2C scenarios <br><sup>Global CO2 reductions by 2030 and 2040</sup>",
+            xref="paper",
+            x=0),
+        xaxis=dict(title="Scenario Narrative", ),
+        yaxis=dict(title="Reduction Value", range=[0, 0.6]),
+        legend=dict(
+            traceorder="normal",
+            itemsizing="constant"
+        )
     )
-)
 
 
-st.plotly_chart(fig, theme="streamlit")
+
+    col1, col2 = st.columns([0.3, 0.7])
+    with col1:
+        st.write('### Implications')
+        st.metric("Earliest possible net-zero year:", earliest_net_zero_year)
+        st.metric("Required coal reduction since 2020:",
+                str(required_coal_reduction_2030) + "%")
+        st.metric("Required solar upscale since 2020:",
+                str(required_solar_upscale_2030) + "%")
+    with col2:
+        st.plotly_chart(fig, theme="streamlit")
+
+
+
