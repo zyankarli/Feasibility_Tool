@@ -3,6 +3,7 @@ import streamlit as st
 import pyam
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 
@@ -26,16 +27,16 @@ def get_data():
     #IIASA
     #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
-    #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
-    #iiasa_creds = st.secrets['iiasa_creds']
-    pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
-    pyam.iiasa.Connection()
+    iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
+    #Online
+    #pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
+    #pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        #creds = iiasa_creds,
+        creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
@@ -57,6 +58,7 @@ def get_data():
         region=["World",
                 "North America; primarily the United States of America and Canada",
                 "Eastern and Western Europe (i.e., the EU28)",
+                "Pacific OECD",
                 "Countries of centrally-planned Asia; primarily China",
                 "Countries of South Asia; primarily India", 
                 "Countries of Sub-Saharan Africa",
@@ -79,7 +81,7 @@ df = get_data().data
 world = df[df['region'] == "World"]
 world.loc[:, "region"] = "World"
 #get OECD*
-oecd = df[df["region"].isin(["North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)"])]\
+oecd = df[df["region"].isin(["North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)", "Pacific OECD"])]\
     .groupby(["model", "scenario", "variable", "year", "unit"])\
         .agg({"value": "sum"}).reset_index()
 oecd['region'] = "OECD"
@@ -87,7 +89,7 @@ oecd['region'] = "OECD"
 china = df[df['region'] == "Countries of centrally-planned Asia; primarily China"]
 china.loc[:, "region"] = "China"
 #get RoW
-row = df[~df["region"].isin(["North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)", "Countries of centrally-planned Asia; primarily China"])]\
+row = df[~df["region"].isin(["World", "North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)", "Pacific OECD", "Countries of centrally-planned Asia; primarily China"])]\
         .groupby(["model", "scenario", "variable", "year", "unit"])\
             .agg({"value": "sum"}).reset_index()
 row["region"] = "RoW"
@@ -137,9 +139,12 @@ st.slider('What is feasible minimum of global coal use in 2030? (The current glo
 
 
 #filter dataframe
-filter_df = pd.pivot(data=to_plot_df, index=['model','scenario', 'region', 'scenario_narrative', '2030_CO2_redu'], columns = 'year', values = 'Primary Energy|Coal').reset_index()
+filter_df = pd.pivot(data=to_plot_df, index=['model','scenario', 'region', 'scenario_narrative', '2030_CO2_redu', '2040_CO2_redu'], columns = 'year', values = 'Primary Energy|Coal').reset_index()
 filter_df = filter_df[filter_df[2030] >= st.session_state['coal_use_2030']]
-#to_plot_df.loc[(to_plot_df["year"] == 2030) & (to_plot_df["Primary Energy|Coal"] >= st.session_state['coal_use_2030'])]
+filter_df = pd.melt(filter_df, id_vars=["model", 'scenario', 'region', 'scenario_narrative', 2030],
+                    value_vars=["2030_CO2_redu", "2040_CO2_redu"],
+                    var_name='reduction_year', value_name='reduction_value')
+
 #calculate "consequences" of input
 #earliest_net_zero_year = filter_df["year_netzero"].min()
 #PA_aligned = (filter_df["carbon_budget"].str.contains("1.5C").sum() > 0)
@@ -156,48 +161,70 @@ if filter_df.empty:
 
 
 
-#UPDATE FIGURE
+#FIGURES
+color_mapping = {
+    'AIM/CGE V2.2': "rgb(255, 0, 0)",
+    'COFFEE 1.5': "rgb(0, 255, 0)",
+    'GEM-E3_V2023': "rgb(0, 0, 255)",
+    'IMAGE 3.2': "rgb(255, 255, 0)",
+    'MESSAGEix-GLOBIOM_1.1': "rgb(255, 0, 255)",
+    'POLES ENGAGE': "rgb(0, 255, 255)",
+    'REMIND 3.0': "rgb(128, 0, 0)",
+    'WITCH 5.0': "rgb(0, 128, 0)"
+}
 
-#FIGURE 
-fig = go.Figure(px.strip(
-    filter_df,
-    x='scenario_narrative',
-    y='2030_CO2_redu',
-    color='model',
-    stripmode='overlay'))
+# Map colors based on the "model" column
+filter_df["color"] = filter_df["model"].map(color_mapping)
+
+fig = make_subplots(rows=1, cols=len(filter_df["reduction_year"].unique()), shared_yaxes=True)
+
+for i, year in enumerate(filter_df["reduction_year"].unique()):
+    box_trace = go.Box(
+        x=filter_df[(filter_df["reduction_year"] == year)]["scenario_narrative"],
+        y=filter_df[(filter_df["reduction_year"] == year)]["reduction_value"],
+        name="Boxplot",
+        boxpoints=False,
+         marker_color='grey',
+        opacity=0.3,
+        showlegend=False
+    )
+
+    fig.add_trace(box_trace, row=1, col=i + 1)
+
+    # Add subplot titles
+    fig.update_layout(
+        annotations=[dict(text=str(year), xref="x" + str(i + 1), yref="paper", x=0.5, y=1.1, showarrow=False) for i, year in enumerate(filter_df["reduction_year"].unique())]
+    )
+
+    # Create a scatterplot for each model
+    for model in filter_df["model"].unique():
+        scatter_trace = go.Scatter(
+            x=filter_df[(filter_df["reduction_year"] == year) & (filter_df["model"] == model)]["scenario_narrative"],
+            y=filter_df[(filter_df["reduction_year"] == year) & (filter_df["model"] == model)]["reduction_value"],
+            mode="markers",
+            name=model,
+            marker=dict(
+                color=color_mapping[model],
+                size=6
+            ),
+            showlegend=i==0,
+            legendgroup=model
+        )
+
+        fig.add_trace(scatter_trace, row=1, col=i + 1)
+
+fig.update_layout(
+    title = go.layout.Title(
+        text="ENGAGE 2C scenarios <br><sup>Global CO2 reductions by 2030 and 2040</sup>",
+        xref="paper",
+        x=0),
+    xaxis=dict(title="Scenario Narrative", ),
+    yaxis=dict(title="Reduction Value"),
+    legend=dict(
+        traceorder="normal",
+        itemsizing="constant"
+    )
+)
 
 
-fig.add_trace(go.Box(
-    y = filter_df[filter_df["scenario_narrative"] == "Instit"]["2030_CO2_redu"],
-    name = "Instit",
-    marker_color='grey',
-    opacity=0.3,
-    boxpoints=False,
-    showlegend=False
-))
-
-fig.add_trace(go.Box(
-    y = filter_df[filter_df["scenario_narrative"] == "Cost Effective"]["2030_CO2_redu"],
-    name = "Cost Effective",
-    marker_color='grey',
-    opacity=0.3,
-    boxpoints=False,
-    showlegend=False
-))
-
-fig.update_traces({'marker':{'size': 8}})
-
-fig.update_layout(autosize=False,
-                  width=600,
-                  height=600,
-                  title = go.layout.Title(
-                    text="ENGAGE 2C scenarios <br><sup>Global CO2 reductions by 2030</sup>",
-                    xref="paper",
-                    x=0),
-                  xaxis_title="Scenario Narrative",
-                  yaxis_title = "CO2 reductions",
-                  yaxis_tickformat='.0%')
-    
 st.plotly_chart(fig, theme="streamlit")
-
-
