@@ -33,16 +33,16 @@ def get_data():
     #IIASA
     #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
-    #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
+    iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
-    pyam.iiasa.Connection()
+    #pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
+    #pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        #creds = iiasa_creds,
+        creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
@@ -376,39 +376,11 @@ with tab2:
     con_3 = to_plot_df.loc[to_plot_df['region'] == "RoW", 'solar_use_2030'] <= st.session_state['solar_use_2030_RoW']
     condition_solar = pd.concat([con_1, con_2, con_3]).sort_index() #the more solar, the larger scenario space
 
-    # con_2 = ((to_plot_df['region'] == "OECD") & (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_OECD']))
-    # con_3 = ((to_plot_df['region'] == "China") & (to_plot_df['coal_use_2030'] >= st.session_state['coal_use_2030_China']))
-    # con_4 = ((to_plot_df['region'] == "RoW") & (to_plot_df['coal_use_2030'] >= st.session_state['coal_use_2030_RoW']))
-    # con_5 = ((to_plot_df['region'] == "China") & (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_China']))
-    # con_6 = ((to_plot_df['region'] == "RoW") & (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_RoW']))
-
-    # st.write(to_plot_df[to_plot_df['region'] != "World"].loc[con_coal].shape)
+    #filter on conditions
     filter_df_region = to_plot_df[to_plot_df["region"] != "World"].loc[condition_coal & condition_solar]
-    ##FINDING MISTAKE
-    # filter_df_region = to_plot_df.loc[con_1]
-    # st.write("Condition 1 (OECD):", filter_df_region.shape)
-
-    # filter_df_region = to_plot_df.loc[con_2]
-    # st.write("Condition 2 (OECD):", filter_df_region.shape)
-
-    # filter_df_region = to_plot_df.loc[con_3]
-    # st.write("Condition 3 (China):", filter_df_region.shape)
-
-    # filter_df_region = to_plot_df.loc[con_4]
-    # st.write("Condition 4 (RoW):", filter_df_region.shape)
-
-    # filter_df_region = to_plot_df.loc[con_5]
-    # st.write("Condition 5 (China):", filter_df_region.shape)
-
-    # filter_df_region = to_plot_df.loc[con_6]
-    # st.write("Condition 6 (RoW):", filter_df_region.shape)
-
-    # filter_df_region = to_plot_df.loc[con_1 & con_2 & con_3 & con_4 & con_5 & con_6]
-    # st.write("Condition ALL:", filter_df_region.shape)
 
 
-    #TODO implement filtering mechanism
-    #filter_df_region = to_plot_df[to_plot_df['region'] != "World"]
+
 
     #METRICS // calculate "consequences" of input
     #required coal reduction compared to 2020 median in percent
@@ -446,13 +418,13 @@ with tab2:
             'REMIND 3.0': "rgb(128, 0, 0)",
             'WITCH 5.0': "rgb(0, 128, 0)"
         }
-
+        region_order = ["OECD", "China", "RoW"]
         # Map colors based on the "model" column
         filter_df["color"] = filter_df["model"].map(color_mapping)
 
-        fig = make_subplots(rows=1, cols=len(filter_df["region"].unique()), shared_yaxes=True)
+        fig = make_subplots(rows=1, cols=len(region_order), shared_yaxes=True)
 
-        for i, region_ in enumerate(filter_df["region"].unique()):
+        for i, region_ in enumerate(region_order):
             box_trace = go.Box(
                 x=filter_df[(filter_df["region"] == region_)]["scenario_narrative"],
                 y=filter_df[(filter_df["region"] == region_)]["reduction_value"],
@@ -467,7 +439,9 @@ with tab2:
 
             # Add subplot titles
             fig.update_layout(
-                annotations=[dict(text=str(year), xref="x" + str(i + 1), yref="paper", x=0.5, y=1.1, showarrow=False) for i, year in enumerate(filter_df["region"].unique())]
+                annotations=[dict(text=str(year), 
+                                  xref="x" + str(i + 1), yref="paper", x=0.5, y=1.1,
+                                  showarrow=False) for i, year in enumerate(region_order)]
             )
 
             # Create a scatterplot for each model
