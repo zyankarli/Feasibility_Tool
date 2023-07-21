@@ -20,7 +20,12 @@ hide_default_format = """
        footer {visibility: hidden;}
        </style>
        """
+
 st.markdown(hide_default_format, unsafe_allow_html=True)
+
+#CCS links:
+## https://discuss.streamlit.io/t/remove-or-reduce-spaces-between-elements/23283
+
 
 @st.cache_resource
 def get_data():
@@ -173,8 +178,8 @@ with tab1:
     #Until when is it feasible to phase out coal
     col_l, col_m, col_r = st.columns(3)
     with col_m:
-        st.write("## Feasibility concerns")
-        st.slider('What is the feasible maximum of global coal use for electricity generation in 2030? (The current global coal use is about ' \
+        st.write("### Feasibility concerns")
+        st.slider('What is the feasible **minimum** of coal used globally for electricity generation in 2030? (The current global coal use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ)",
                 min_value = 1,
@@ -182,7 +187,7 @@ with tab1:
                 value = 1,
                 step = 5, 
                 key = "coal_use_2030_world")
-        st.slider('What is the feasible maximium of global solar power use for elecricity generation in 2030? (The current global coal use is about ' \
+        st.slider('What is the feasible **maximium** of global solar power used globally for elecricity generation in 2030? (The current global coal use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ)",
                     min_value = 5,
@@ -302,41 +307,120 @@ with tab2:
     #Until when is it feasible to phase out coal
     col_l, col_m, col_r = st.columns(3)
     with col_m:
-        st.write("## Feasibility concerns")
-        st.slider('What is the feasible maximum of regional coal use for electricity generation in 2030? (The current global coal use is about ' \
-                + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median()))) \
+        st.write("### Feasibility concerns")
+    with col_l:
+        st.write("#### Feasible **minimum** of coal used for electricity generation in 2030:") # round off min value
+        st.slider('In **OECD** (The current coal use is about ' \
+                + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ)",
-                min_value = 1,
-                max_value = 25,
-                value = 1,
-                step = 5, 
-                key = "coal_use_2030_region")
-        st.slider('What is the feasible maximium of regional solar power use for elecricity generation in 2030? (The current global coal use is about ' \
-                + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median()))) \
+                min_value = 0.0,
+                max_value = 7.5,
+                value = 0.0,
+                step = 1.0, 
+                key = "coal_use_2030_OECD")
+                
+        st.slider('In **China** (The current coal use is about ' \
+                + str(round(float(df[(df["year"] == 2020) & (df["region"] == "China")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ)",
-                    min_value = 5,
-                    max_value = 40,
-                    value = 40,
-                    step = 5,
-                    key = 'solar_use_2030_region')
+                min_value=0.0,
+                max_value=19.0,
+                value=0.0,
+                step=1.0,
+                key="coal_use_2030_China")
+        
+        st.slider('In the **rest of the world** (The current coal use is about ' \
+                + str(round(float(df[(df["year"] == 2020) & (df["region"] == "RoW")]["Secondary Energy|Electricity|Coal"].median()))) \
+                + "EJ)",
+                min_value=0.0,
+                max_value=9.0,
+                value=0.0,
+                step=1.0,
+                key="coal_use_2030_RoW")
+    with col_r:
+        st.write("#### Feasible **maximum** of solar power used for electricity generation in 2030:")
+        st.slider('In **OECD** (The current solar use is about ' \
+                + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Solar"].median()))) \
+                + "EJ)",
+                    min_value = 2.5,
+                    max_value = 14.0,
+                    value = 14.0,
+                    step = 2.5,
+                    key = 'solar_use_2030_OECD')
+        st.slider('In **China** (The current solar use is about ' \
+                + str(round(float(df[(df["year"] == 2020) & (df["region"] == "China")]["Secondary Energy|Electricity|Solar"].median()))) \
+                + "EJ)",
+                min_value=2.0,
+                max_value=12.5,
+                value=12.5,
+                step=2.0,
+                key="solar_use_2030_China")
+        
+        st.slider('In the **rest of the world** (The current solar use is about ' \
+                + str(round(float(df[(df["year"] == 2020) & (df["region"] == "RoW")]["Secondary Energy|Electricity|Solar"].median()))) \
+                + "EJ)",
+                min_value=2.0,
+                max_value=16.0,
+                value=16.0,
+                step=3.0,
+                key="solar_use_2030_RoW")
 
     #filter dataframe
-    # filter_df_region = to_plot_df[(to_plot_df['coal_use_2030'] >= st.session_state['coal_use_2030_region']) &\
-    #                     (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_region']) &\
-    #                     (to_plot_df['region'] != "World")]
+    ##conditions
+    con_1 = to_plot_df.loc[to_plot_df['region'] == "OECD", 'coal_use_2030'] >= st.session_state['coal_use_2030_OECD']
+    con_2 = to_plot_df.loc[to_plot_df['region'] == "China", 'coal_use_2030'] >= st.session_state['coal_use_2030_China']
+    con_3 = to_plot_df.loc[to_plot_df['region'] == "RoW", 'coal_use_2030'] >= st.session_state['coal_use_2030_RoW']
+    condition_coal = pd.concat([con_1, con_2, con_3]).sort_index() #the less coal, the larger scenario space
+
+    con_1 = to_plot_df.loc[to_plot_df['region'] == "OECD", 'solar_use_2030'] <= st.session_state['solar_use_2030_OECD']
+    con_2 = to_plot_df.loc[to_plot_df['region'] == "China", 'solar_use_2030'] <= st.session_state['solar_use_2030_China']
+    con_3 = to_plot_df.loc[to_plot_df['region'] == "RoW", 'solar_use_2030'] <= st.session_state['solar_use_2030_RoW']
+    condition_solar = pd.concat([con_1, con_2, con_3]).sort_index() #the more solar, the larger scenario space
+
+    # con_2 = ((to_plot_df['region'] == "OECD") & (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_OECD']))
+    # con_3 = ((to_plot_df['region'] == "China") & (to_plot_df['coal_use_2030'] >= st.session_state['coal_use_2030_China']))
+    # con_4 = ((to_plot_df['region'] == "RoW") & (to_plot_df['coal_use_2030'] >= st.session_state['coal_use_2030_RoW']))
+    # con_5 = ((to_plot_df['region'] == "China") & (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_China']))
+    # con_6 = ((to_plot_df['region'] == "RoW") & (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_RoW']))
+
+    # st.write(to_plot_df[to_plot_df['region'] != "World"].loc[con_coal].shape)
+    filter_df_region = to_plot_df[to_plot_df["region"] != "World"].loc[condition_coal & condition_solar]
+    ##FINDING MISTAKE
+    # filter_df_region = to_plot_df.loc[con_1]
+    # st.write("Condition 1 (OECD):", filter_df_region.shape)
+
+    # filter_df_region = to_plot_df.loc[con_2]
+    # st.write("Condition 2 (OECD):", filter_df_region.shape)
+
+    # filter_df_region = to_plot_df.loc[con_3]
+    # st.write("Condition 3 (China):", filter_df_region.shape)
+
+    # filter_df_region = to_plot_df.loc[con_4]
+    # st.write("Condition 4 (RoW):", filter_df_region.shape)
+
+    # filter_df_region = to_plot_df.loc[con_5]
+    # st.write("Condition 5 (China):", filter_df_region.shape)
+
+    # filter_df_region = to_plot_df.loc[con_6]
+    # st.write("Condition 6 (RoW):", filter_df_region.shape)
+
+    # filter_df_region = to_plot_df.loc[con_1 & con_2 & con_3 & con_4 & con_5 & con_6]
+    # st.write("Condition ALL:", filter_df_region.shape)
+
+
     #TODO implement filtering mechanism
-    filter_df_region = to_plot_df[to_plot_df['region'] != "World"]
+    #filter_df_region = to_plot_df[to_plot_df['region'] != "World"]
+
     #METRICS // calculate "consequences" of input
     #required coal reduction compared to 2020 median in percent
-    required_coal_reduction_2030 = round(
+    required_coal_reduction_2030_OECD = round(
     100 - \
-    (float(st.session_state['coal_use_2030_region']) / \
-            round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median())) *\
+    (float(st.session_state['coal_use_2030_OECD']) / \
+            round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Coal"].median())) *\
             100))
 
-    required_solar_upscale_2030 = round(
-    float(st.session_state['solar_use_2030_region']) / \
-            round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median())) *\
+    required_solar_upscale_2030_OECD = round(
+    float(st.session_state['solar_use_2030_OECD']) / \
+            round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Solar"].median())) *\
             100)
 
     #Dealing with scenarios that never reach net_zero
