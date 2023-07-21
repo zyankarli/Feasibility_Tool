@@ -33,16 +33,16 @@ def get_data():
     #IIASA
     #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
-    iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
+    #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    #pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
-    #pyam.iiasa.Connection()
+    pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
+    pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        creds = iiasa_creds,
+        #creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
@@ -238,9 +238,12 @@ with tab1:
             'REMIND 3.0': "rgb(128, 0, 0)",
             'WITCH 5.0': "rgb(0, 128, 0)"
         }
-
         # Map colors based on the "model" column
         filter_df_world["color"] = filter_df_world["model"].map(color_mapping)
+
+        #set order of scenario_narratives for plot
+        filter_df_world["scenario_narrative"] = pd.Categorical(filter_df_world["scenario_narrative"], categories=["Cost Effective", "Instit"])
+        filter_df_world = filter_df_world.sort_values(by="scenario_narrative")
 
         fig_world = make_subplots(rows=1, cols=len(filter_df_world["reduction_year"].unique()), shared_yaxes=True)
 
@@ -420,6 +423,7 @@ with tab2:
     else:
         #FIGURES
         #filter data on reduction year
+        #TODO rename dataframe to filter_df_region
         filter_df = filter_df_region[filter_df_region['reduction_year'] == "2030_CO2_redu"]
         # Define color mapping for models
         color_mapping = {
@@ -432,9 +436,14 @@ with tab2:
             'REMIND 3.0': "rgb(128, 0, 0)",
             'WITCH 5.0': "rgb(0, 128, 0)"
         }
-        region_order = ["OECD", "China", "RoW"]
         # Map colors based on the "model" column
         filter_df["color"] = filter_df["model"].map(color_mapping)
+        
+        #set order of regions in plot
+        region_order = ["OECD", "China", "RoW"]
+        #set order of scenario_narratives for plot
+        filter_df["scenario_narrative"] = pd.Categorical(filter_df["scenario_narrative"], categories=["Cost Effective", "Instit"])
+        filter_df = filter_df.sort_values(by="scenario_narrative")
 
         fig = make_subplots(rows=1, cols=len(region_order), shared_yaxes=True)
 
