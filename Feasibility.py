@@ -181,19 +181,21 @@ with tab1:
         st.write("### Feasibility concerns")
         st.slider('What is the feasible **minimum** of coal used globally for electricity generation in 2030? (The current global coal use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median()))) \
-                + "EJ)",
+                + "EJ/yr)",
                 min_value = 1,
                 max_value = 25,
                 value = 1,
-                step = 5, 
+                step = 5,
+                format="%.1f EJ/yr",
                 key = "coal_use_2030_world")
         st.slider('What is the feasible **maximium** of global solar power used globally for elecricity generation in 2030? (The current global coal use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median()))) \
-                + "EJ)",
+                + "EJ/yr)",
                     min_value = 5,
                     max_value = 40,
                     value = 40,
                     step = 5,
+                    format="%.1f EJ/yr",
                     key = 'solar_use_2030_world')
 
     #filter dataframe
@@ -312,56 +314,62 @@ with tab2:
         st.write("#### Feasible **minimum** of coal used for electricity generation in 2030:") # round off min value
         st.slider('In **OECD** (The current coal use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Coal"].median()))) \
-                + "EJ)",
+                + "EJ/yr)",
                 min_value = 0.0,
                 max_value = 7.5,
                 value = 0.0,
-                step = 1.0, 
+                step = 1.0,
+                format="%.1f EJ/yr",
                 key = "coal_use_2030_OECD")
                 
         st.slider('In **China** (The current coal use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "China")]["Secondary Energy|Electricity|Coal"].median()))) \
-                + "EJ)",
+                + "EJ/yr)",
                 min_value=0.0,
                 max_value=19.0,
                 value=0.0,
                 step=1.0,
+                format="%.1f EJ/yr",
                 key="coal_use_2030_China")
         
         st.slider('In the **rest of the world** (The current coal use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "RoW")]["Secondary Energy|Electricity|Coal"].median()))) \
-                + "EJ)",
+                + "EJ/yr)",
                 min_value=0.0,
                 max_value=9.0,
                 value=0.0,
                 step=1.0,
+                format="%.1f EJ/yr",
                 key="coal_use_2030_RoW")
     with col_r:
         st.write("#### Feasible **maximum** of solar power used for electricity generation in 2030:")
         st.slider('In **OECD** (The current solar use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Solar"].median()))) \
-                + "EJ)",
+                + "EJ/yr)",
                     min_value = 2.5,
                     max_value = 14.0,
                     value = 14.0,
                     step = 2.5,
+                    format="%.1f EJ/yr",
                     key = 'solar_use_2030_OECD')
         st.slider('In **China** (The current solar use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "China")]["Secondary Energy|Electricity|Solar"].median()))) \
-                + "EJ)",
+                + "EJ/yr)",
                 min_value=2.0,
                 max_value=12.5,
                 value=12.5,
                 step=2.0,
+                format="%.1f EJ/yr",
                 key="solar_use_2030_China")
         
         st.slider('In the **rest of the world** (The current solar use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "RoW")]["Secondary Energy|Electricity|Solar"].median()))) \
-                + "EJ)",
+                + "EJ/yr)",
                 min_value=2.0,
                 max_value=16.0,
                 value=16.0,
                 step=3.0,
+                format="%.1f EJ/yr",
                 key="solar_use_2030_RoW")
 
     #filter dataframe
@@ -378,10 +386,7 @@ with tab2:
 
     #filter on conditions
     filter_df_region = to_plot_df[to_plot_df["region"] != "World"].loc[condition_coal & condition_solar]
-
-
-
-
+   
     #METRICS // calculate "consequences" of input
     #required coal reduction compared to 2020 median in percent
     required_coal_reduction_2030_OECD = round(
@@ -395,9 +400,18 @@ with tab2:
             round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Solar"].median())) *\
             100)
 
+    #only report on global net zero 
+    #drop year_netzero column
+    filter_df_region.drop(columns=["year_netzero"], inplace=True)
+    #add global netzero column
+    filter_df_region = pd.merge(left=filter_df_region, 
+                                right=to_plot_df[to_plot_df['region'] == "World"][['model', 'scenario', 'year_netzero']],
+                                on = ["model", "scenario"])
+    #rename year_netzero to year_netzero_global
+    filter_df_region.rename(columns={"year_netzero": "year_netzero_global"}, inplace=True)
     #Dealing with scenarios that never reach net_zero
-    if pd.to_numeric(filter_df_region["year_netzero"], errors="coerce").notna().sum() != 0: #as long as there are numbers, display the lowest value
-        earliest_net_zero_year = filter_df_region[pd.to_numeric(filter_df_region["year_netzero"], errors="coerce").notna()]["year_netzero"].min() #filter only to numeric values
+    if pd.to_numeric(filter_df_region["year_netzero_global"], errors="coerce").notna().sum() != 0: #as long as there are numbers, display the lowest value
+        earliest_net_zero_year = filter_df_region[pd.to_numeric(filter_df_region["year_netzero_global"], errors="coerce").notna()]["year_netzero_global"].min() #filter only to numeric values
     else: #display disclaimer
         earliest_net_zero_year = "not within this century"
     
@@ -466,22 +480,19 @@ with tab2:
             text="ENGAGE 2C scenarios <br><sup>Regional CO2 reductions by 2030 </sup>",
             xref="paper",
             x=0),
-        xaxis=dict(title="Scenario Narrative", ),
-        yaxis=dict(title="Reduction Value", range=[-0.2, 0.6]),
+        #xaxis=dict(title="Scenario Narrative"),
+        yaxis=dict(title="Necessary CO2 Reduction (%)", range=[-0.2, 0.6], tickformat="2%"),
         legend=dict(
             traceorder="normal",
             itemsizing="constant"
         )
     )
+    fig.update_xaxes(title_text="Scenario Narrative", col=2)
 
     #print output
     col1, col2 = st.columns([0.3, 0.7])
     with col1:
         st.write('### Regional Policy Implications')
-        st.metric("Earliest possible net-zero year:", earliest_net_zero_year)
-        st.metric("Required coal reduction since 2020:",
-                str(required_coal_reduction_2030) + "%")
-        st.metric("Required solar upscale since 2020:",
-                str(required_solar_upscale_2030) + "%")
+        st.metric("Earliest possible global net-zero year:", earliest_net_zero_year)
     with col2:
         st.plotly_chart(fig, theme="streamlit")
