@@ -352,7 +352,7 @@ with tab2:
                     min_value = 8.0,
                     max_value = 14.0,
                     value = 14.0,
-                    step = 2,
+                    step = 2.0,
                     format="%.1f EJ/yr",
                     key = 'solar_use_2030_OECD')
         st.slider('In **China** (The current solar use is about ' \
