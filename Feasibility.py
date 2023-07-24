@@ -319,7 +319,7 @@ with tab2:
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
                 min_value = 0.0,
-                max_value = 2,
+                max_value = 2.0,
                 value = 0.0,
                 step = 1.0,
                 format="%.1f EJ/yr",
