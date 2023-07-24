@@ -31,18 +31,18 @@ st.markdown(hide_default_format, unsafe_allow_html=True)
 def get_data():
     #get IIASA identification
     #IIASA
-    #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
+    iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
     #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
-    pyam.iiasa.Connection()
+    #pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
+    #pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        #creds = iiasa_creds,
+        creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
@@ -149,6 +149,9 @@ coal_use_2030.rename(columns={2030:"coal_use_2030"}, inplace=True)
 solar_use_2030 = pd.pivot(data=to_plot_df, index=['model','scenario', 'region'], columns = 'year', values = 'Secondary Energy|Electricity|Solar').reset_index()[['model', 'scenario', 'region', 2030]]
 solar_use_2030.rename(columns={2030:"solar_use_2030"}, inplace=True)
 
+ccs_use_2030 = pd.pivot(data=to_plot_df, index=['model','scenario', 'region'], columns = 'year', values = 'Carbon Sequestration|CCS').reset_index()[['model', 'scenario', 'region', 2030]]
+ccs_use_2030.rename(columns={2030:"ccs_use_2030"}, inplace=True) #unit 	Mt CO2/yr
+
 #calculate year that each scenario hit's net zero
 netzero_df = df[df["Emissions|CO2"] <= 0].groupby(["model", "scenario", "region"])['year'].min().reset_index() #net-zero set to 0 CO2 emissions here
 #get all the scenarios that don't reach net_zero
@@ -166,16 +169,15 @@ netzero_df.rename(columns={"year": "year_netzero"}, inplace=True)
 #merge
 to_plot_df = pd.merge(left=reductions_df, right=coal_use_2030, on=["model", "scenario", "region"])
 to_plot_df = pd.merge(left=to_plot_df, right=solar_use_2030, on=["model", "scenario", "region"])
+to_plot_df = pd.merge(left=to_plot_df, right=ccs_use_2030, on=["model", "scenario", "region"])
 to_plot_df = pd.merge(left=to_plot_df, right=netzero_df, on=["model", "scenario", "region"])
 
 
 # #make CO2 reduction longer for plotting purposes
 #reduce data
-to_plot_df = pd.melt(to_plot_df, id_vars=["model", 'scenario', 'region', 'scenario_narrative', 'coal_use_2030','solar_use_2030', 'year_netzero'],
+to_plot_df = pd.melt(to_plot_df, id_vars=["model", 'scenario', 'region', 'scenario_narrative', 'coal_use_2030','solar_use_2030', 'ccs_use_2030', 'year_netzero'],
                     value_vars=["2030_CO2_redu", "2040_CO2_redu"],
                     var_name='reduction_year', value_name='reduction_value')
-
-st.write(to_plot_df)
 
 tab1, tab2 = st.tabs(["Globe", "Regions"])
 
@@ -204,10 +206,20 @@ with tab1:
                     step = 5,
                     format="%.1f EJ/yr",
                     key = 'solar_use_2030_world')
+        st.slider('What is the feasible **maximium** of global CCS deployment in 2030? (The current global deployment is about ' \
+                + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Carbon Sequestration|CCS"].median()))) \
+                + "Mt CO2/yr)",
+                    min_value = 400,
+                    max_value = 1200,
+                    value = 1200,
+                    step = 200,
+                    format="%.1f Mt CO2/yr",
+                    key = 'ccs_use_2030_world')
 
     #filter dataframe
     filter_df_world = to_plot_df[(to_plot_df['coal_use_2030'] >= st.session_state['coal_use_2030_world']) &\
                         (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_world']) &\
+                        (to_plot_df['ccs_use_2030'] <= st.session_state['ccs_use_2030_world']) &\
                         (to_plot_df['region'] == "World")]
 
     #METRICS // calculate "consequences" of input
@@ -252,9 +264,12 @@ with tab1:
         filter_df_world["scenario_narrative"] = pd.Categorical(filter_df_world["scenario_narrative"], categories=["Cost Effective", "Instit", "NDC", "Current Policy"])
         filter_df_world = filter_df_world.sort_values(by="scenario_narrative")
 
+        #TODO: test for each scenario, how many models (unique) are still present. When this number drops below 3, set the reduction_value of all respective rows to 0
+        #(filter_df_world[(filter_df_world["reduction_year"] == '2030_CO2_redu')].groupby('scenario')['model']))
+        
         fig_world = make_subplots(rows=1, cols=len(filter_df_world["reduction_year"].unique()), shared_yaxes=True)
 
-        for i, year in enumerate(filter_df_world["reduction_year"].unique()):
+        for i, year in enumerate(filter_df_world["reduction_year"].unique()):            
             box_trace = go.Box(
                 x=filter_df_world[(filter_df_world["reduction_year"] == year)]["scenario_narrative"],
                 y=filter_df_world[(filter_df_world["reduction_year"] == year)]["reduction_value"],
@@ -263,7 +278,7 @@ with tab1:
                 marker_color='grey',
                 opacity=0.3,
                 showlegend=False
-            )
+        )
 
             fig_world.add_trace(box_trace, row=1, col=i + 1)
 
