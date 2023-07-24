@@ -183,7 +183,7 @@ with tab1:
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
                 min_value = 1,
-                max_value = 25,
+                max_value = 20,
                 value = 1,
                 step = 5,
                 format="%.1f EJ/yr",
@@ -191,7 +191,7 @@ with tab1:
         st.slider('What is the feasible **maximium** of global solar power used globally for elecricity generation in 2030? (The current global coal use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
-                    min_value = 5,
+                    min_value = 15,
                     max_value = 40,
                     value = 40,
                     step = 5,
@@ -299,9 +299,9 @@ with tab1:
         with col1:
             st.write('### Global Policy Implications')
             st.metric("Earliest possible net-zero year:", earliest_net_zero_year)
-            st.metric("Required coal reduction since 2020:",
+            st.metric("Required coal reduction in the next 10 years:",
                     str(required_coal_reduction_2030) + "%")
-            st.metric("Required solar upscale since 2020:",
+            st.metric("Required solar upscale in the next 10 years:",
                     str(required_solar_upscale_2030) + "%")
         with col2:
             st.plotly_chart(fig_world, theme="streamlit")
@@ -319,7 +319,7 @@ with tab2:
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
                 min_value = 0.0,
-                max_value = 7.5,
+                max_value = 2,
                 value = 0.0,
                 step = 1.0,
                 format="%.1f EJ/yr",
@@ -329,9 +329,9 @@ with tab2:
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "China")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
                 min_value=0.0,
-                max_value=19.0,
+                max_value=12.0,
                 value=0.0,
-                step=1.0,
+                step=4.0,
                 format="%.1f EJ/yr",
                 key="coal_use_2030_China")
         
@@ -339,7 +339,7 @@ with tab2:
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "RoW")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
                 min_value=0.0,
-                max_value=9.0,
+                max_value=4.0,
                 value=0.0,
                 step=1.0,
                 format="%.1f EJ/yr",
@@ -349,16 +349,16 @@ with tab2:
         st.slider('In **OECD** (The current solar use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
-                    min_value = 2.5,
+                    min_value = 8.0,
                     max_value = 14.0,
                     value = 14.0,
-                    step = 2.5,
+                    step = 2,
                     format="%.1f EJ/yr",
                     key = 'solar_use_2030_OECD')
         st.slider('In **China** (The current solar use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "China")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
-                min_value=2.0,
+                min_value=6.0,
                 max_value=12.5,
                 value=12.5,
                 step=2.0,
@@ -368,10 +368,10 @@ with tab2:
         st.slider('In the **rest of the world** (The current solar use is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "RoW")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
-                min_value=2.0,
+                min_value=8.0,
                 max_value=16.0,
                 value=16.0,
-                step=3.0,
+                step=2.0,
                 format="%.1f EJ/yr",
                 key="solar_use_2030_RoW")
 
