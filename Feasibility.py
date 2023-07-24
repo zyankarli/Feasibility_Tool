@@ -223,7 +223,6 @@ with tab1:
                         (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_world']) &\
                         (to_plot_df['ccs_use_2050'] <= st.session_state['ccs_use_2050_world']) &\
                         (to_plot_df['region'] == "World")]
-    st.write(filter_df_world['model'].unique())
     #METRICS // calculate "consequences" of input
     #required coal reduction compared to 2020 median in percent
     required_coal_reduction_2030 = round(
