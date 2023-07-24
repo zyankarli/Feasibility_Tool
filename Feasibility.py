@@ -31,25 +31,27 @@ st.markdown(hide_default_format, unsafe_allow_html=True)
 def get_data():
     #get IIASA identification
     #IIASA
-    #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
+    iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
     #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
-    pyam.iiasa.Connection()
+    #pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
+    #pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        #creds = iiasa_creds,
+        creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
             "T34_1000_feas_em",
             "T34_1000_bitb_em",
             "T34_1000_bitb_ref",
-            "T34_1000_enab_em"
+            "T34_1000_enab_em",
+            "T34_NPi2100",
+            "T34_NDC2100"
         ],
         variable=["Emissions|CO2", 
                   'Emissions|Kyoto Gases',
@@ -116,16 +118,20 @@ df['scenario_narrative'] = np.where(df['scenario'].str.contains("T34_1000_govem"
 df['scenario_narrative'] = np.where(df['scenario'].str.contains("T34_1000_bitb_em", case=True), "Tech+Inst", df['scenario_narrative'])
 df['scenario_narrative'] = np.where(df['scenario'].str.contains("T34_1000_enab_em", case=True), "Inst+Enab", df['scenario_narrative'])
 df['scenario_narrative'] = np.where(df['scenario'].str.contains("T34_1000_feas_em", case=True), "Tech+Inst+Enab", df['scenario_narrative'])
+df['scenario_narrative'] = np.where(df['scenario'].str.contains("T34_NDC2100", case=True), "NDC", df['scenario_narrative'])
+df['scenario_narrative'] = np.where(df['scenario'].str.contains("T34_NPi2100", case=True), "Current Policy", df['scenario_narrative'])
 
 #caluclate percentages of energymix for coal and gas
 df["Share_Coal"] = df["Primary Energy|Coal"] / df["Primary Energy"]
 df["Share_Gas"] = df["Primary Energy|Gas"] / df["Primary Energy"]
 
 
+
 #GET DATA TO PLOT
 #filter
 #to_plot_df = df[(df['year'].isin([2020, 2030, 2040])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_govem"])) & (df["region"] == "World")] #old approach
-to_plot_df = df[(df['year'].isin([2020, 2030, 2040])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_govem"]))] #without world filter
+to_plot_df = df[(df['year'].isin([2020, 2030, 2040])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_govem", 'T34_NDC2100', 'T34_NPi2100']))] #without world filter
+
 
 
 
@@ -146,7 +152,7 @@ solar_use_2030.rename(columns={2030:"solar_use_2030"}, inplace=True)
 #calculate year that each scenario hit's net zero
 netzero_df = df[df["Emissions|CO2"] <= 0].groupby(["model", "scenario", "region"])['year'].min().reset_index() #net-zero set to 0 CO2 emissions here
 #get all the scenarios that don't reach net_zero
-no_netzero_df = df[df["scenario"].isin(["T34_1000_ref", "T34_1000_govem"])][["model", "scenario", "region", "year", "Emissions|CO2"]]
+no_netzero_df = df[df["scenario"].isin(["T34_1000_ref", "T34_1000_govem", 'T34_NDC2100', 'T34_NPi2100'])][["model", "scenario", "region", "year", "Emissions|CO2"]]
 no_netzero_df["netzero_test"] = no_netzero_df["Emissions|CO2"] <= 0
 no_netzero_df = pd.DataFrame(no_netzero_df.groupby(["model", 'scenario', 'region'])["netzero_test"].sum()).reset_index()
 no_netzero_df = no_netzero_df[no_netzero_df["netzero_test"] == 0]
@@ -169,6 +175,7 @@ to_plot_df = pd.melt(to_plot_df, id_vars=["model", 'scenario', 'region', 'scenar
                     value_vars=["2030_CO2_redu", "2040_CO2_redu"],
                     var_name='reduction_year', value_name='reduction_value')
 
+st.write(to_plot_df)
 
 tab1, tab2 = st.tabs(["Globe", "Regions"])
 
@@ -242,7 +249,7 @@ with tab1:
         filter_df_world["color"] = filter_df_world["model"].map(color_mapping)
 
         #set order of scenario_narratives for plot
-        filter_df_world["scenario_narrative"] = pd.Categorical(filter_df_world["scenario_narrative"], categories=["Cost Effective", "Instit"])
+        filter_df_world["scenario_narrative"] = pd.Categorical(filter_df_world["scenario_narrative"], categories=["Cost Effective", "Instit", "NDC", "Current Policy"])
         filter_df_world = filter_df_world.sort_values(by="scenario_narrative")
 
         fig_world = make_subplots(rows=1, cols=len(filter_df_world["reduction_year"].unique()), shared_yaxes=True)
@@ -288,7 +295,7 @@ with tab1:
                 xref="paper",
                 x=0),
             xaxis=dict(title="Scenario Narrative", ),
-            yaxis=dict(title="Reduction Value", range=[0, 0.6]),
+            yaxis=dict(title="Reduction Value", range=[-0.2, 0.6]),
             legend=dict(
                 traceorder="normal",
                 itemsizing="constant"
