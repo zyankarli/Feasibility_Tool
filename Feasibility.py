@@ -130,7 +130,7 @@ df["Share_Gas"] = df["Primary Energy|Gas"] / df["Primary Energy"]
 #GET DATA TO PLOT
 #filter
 #to_plot_df = df[(df['year'].isin([2020, 2030, 2040])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_govem"])) & (df["region"] == "World")] #old approach
-to_plot_df = df[(df['year'].isin([2020, 2030, 2040])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_govem", 'T34_NDC2100', 'T34_NPi2100']))] #without world filter
+to_plot_df = df[(df['year'].isin([2020, 2030, 2040, 2050])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_govem", 'T34_NDC2100', 'T34_NPi2100']))] #without world filter
 
 
 
@@ -149,8 +149,8 @@ coal_use_2030.rename(columns={2030:"coal_use_2030"}, inplace=True)
 solar_use_2030 = pd.pivot(data=to_plot_df, index=['model','scenario', 'region'], columns = 'year', values = 'Secondary Energy|Electricity|Solar').reset_index()[['model', 'scenario', 'region', 2030]]
 solar_use_2030.rename(columns={2030:"solar_use_2030"}, inplace=True)
 
-ccs_use_2030 = pd.pivot(data=to_plot_df, index=['model','scenario', 'region'], columns = 'year', values = 'Carbon Sequestration|CCS').reset_index()[['model', 'scenario', 'region', 2030]]
-ccs_use_2030.rename(columns={2030:"ccs_use_2030"}, inplace=True) #unit 	Mt CO2/yr
+ccs_use_2030 = pd.pivot(data=to_plot_df, index=['model','scenario', 'region'], columns = 'year', values = 'Carbon Sequestration|CCS').reset_index()[['model', 'scenario', 'region', 2050]]
+ccs_use_2030.rename(columns={2050:"ccs_use_2050"}, inplace=True) #unit 	Mt CO2/yr
 
 #calculate year that each scenario hit's net zero
 netzero_df = df[df["Emissions|CO2"] <= 0].groupby(["model", "scenario", "region"])['year'].min().reset_index() #net-zero set to 0 CO2 emissions here
@@ -175,9 +175,11 @@ to_plot_df = pd.merge(left=to_plot_df, right=netzero_df, on=["model", "scenario"
 
 # #make CO2 reduction longer for plotting purposes
 #reduce data
-to_plot_df = pd.melt(to_plot_df, id_vars=["model", 'scenario', 'region', 'scenario_narrative', 'coal_use_2030','solar_use_2030', 'ccs_use_2030', 'year_netzero'],
+to_plot_df = pd.melt(to_plot_df, id_vars=["model", 'scenario', 'region', 'scenario_narrative', 'coal_use_2030','solar_use_2030', 'ccs_use_2050', 'year_netzero'],
                     value_vars=["2030_CO2_redu", "2040_CO2_redu"],
                     var_name='reduction_year', value_name='reduction_value')
+#POLES ENGAGE model doesn't report CCS; set all it's NA values to 4000 so that it's still displayed in graph
+to_plot_df['ccs_use_2050'] = to_plot_df['ccs_use_2050'].fillna(6000)
 
 tab1, tab2 = st.tabs(["Globe", "Regions"])
 
@@ -206,22 +208,22 @@ with tab1:
                     step = 5,
                     format="%.1f EJ/yr",
                     key = 'solar_use_2030_world')
-        st.slider('What is the feasible **maximium** of global CCS deployment in 2030? (The current global deployment is about ' \
+        st.slider('What is the feasible **maximium** of global CCS deployment in 2050? (The current global deployment is about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Carbon Sequestration|CCS"].median()))) \
                 + "Mt CO2/yr)",
-                    min_value = 400,
-                    max_value = 1200,
-                    value = 1200,
-                    step = 200,
+                    min_value = 2000,
+                    max_value = 12100,
+                    value = 12100,
+                    step = 2000,
                     format="%.1f Mt CO2/yr",
-                    key = 'ccs_use_2030_world')
+                    key = 'ccs_use_2050_world')
 
     #filter dataframe
     filter_df_world = to_plot_df[(to_plot_df['coal_use_2030'] >= st.session_state['coal_use_2030_world']) &\
                         (to_plot_df['solar_use_2030'] <= st.session_state['solar_use_2030_world']) &\
-                        (to_plot_df['ccs_use_2030'] <= st.session_state['ccs_use_2030_world']) &\
+                        (to_plot_df['ccs_use_2050'] <= st.session_state['ccs_use_2050_world']) &\
                         (to_plot_df['region'] == "World")]
-
+    st.write(filter_df_world['model'].unique())
     #METRICS // calculate "consequences" of input
     #required coal reduction compared to 2020 median in percent
     required_coal_reduction_2030 = round(
