@@ -263,6 +263,7 @@ with tab1:
 
         #set order of scenario_narratives for plot
         filter_df_world["scenario_narrative"] = pd.Categorical(filter_df_world["scenario_narrative"], categories=["Cost Effective", "Instit", "NDC", "Current Policy"])
+        filter_df_world["reduction_year"] = pd.Categorical(filter_df_world["reduction_year"], categories=["2030_CO2_redu", "2040_CO2_redu"])
         filter_df_world = filter_df_world.sort_values(by="scenario_narrative")
 
         #TODO: test for each scenario, how many models (unique) are still present. When this number drops below 3, set the reduction_value of all respective rows to 0
