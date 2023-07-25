@@ -190,7 +190,7 @@ with tab1:
     col_l, col_m, col_r = st.columns(3)
     with col_m:
         st.write("### Feasibility concerns")
-        st.slider('What is the feasible **minimum** of coal used globally for electricity generation in 2030? (The current global coal use is about ' \
+        st.slider('What is the feasible **minimum** of coal used globally for electricity generation in 2030? (The global coal use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
                 min_value = 1,
@@ -199,7 +199,7 @@ with tab1:
                 step = 5,
                 format="%.1f EJ/yr",
                 key = "coal_use_2030_world")
-        st.slider('What is the feasible **maximium** of global solar power used globally for elecricity generation in 2030? (The current global coal use is about ' \
+        st.slider('What is the feasible **maximium** of global solar power used globally for elecricity generation in 2030? (The global coal use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
                     min_value = 15,
@@ -208,7 +208,7 @@ with tab1:
                     step = 5,
                     format="%.1f EJ/yr",
                     key = 'solar_use_2030_world')
-        st.slider('What is the feasible **maximium** of global CCS deployment in 2050? (The current global deployment is about ' \
+        st.slider('What is the feasible **maximium** of global CCS deployment in 2050? (The global deployment in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Carbon Sequestration|CCS"].median()))) \
                 + "Mt CO2/yr)",
                     min_value = 2000,
@@ -338,7 +338,7 @@ with tab2:
         st.write("### Feasibility concerns")
     with col_l:
         st.write("#### Feasible **minimum** of coal used for electricity generation in 2030:") # round off min value
-        st.slider('In **OECD** (The current coal use is about ' \
+        st.slider('In **OECD** (The coal use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
                 min_value = 0.0,
@@ -348,7 +348,7 @@ with tab2:
                 format="%.1f EJ/yr",
                 key = "coal_use_2030_OECD")
                 
-        st.slider('In **China** (The current coal use is about ' \
+        st.slider('In **China** (The coal use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "China")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
                 min_value=0.0,
@@ -358,7 +358,7 @@ with tab2:
                 format="%.1f EJ/yr",
                 key="coal_use_2030_China")
         
-        st.slider('In the **rest of the world** (The current coal use is about ' \
+        st.slider('In the **rest of the world** (The coal use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "RoW")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
                 min_value=0.0,
@@ -369,7 +369,7 @@ with tab2:
                 key="coal_use_2030_RoW")
     with col_r:
         st.write("#### Feasible **maximum** of solar power used for electricity generation in 2030:")
-        st.slider('In **OECD** (The current solar use is about ' \
+        st.slider('In **OECD** (The solar use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
                     min_value = 8.0,
@@ -378,7 +378,7 @@ with tab2:
                     step = 2.0,
                     format="%.1f EJ/yr",
                     key = 'solar_use_2030_OECD')
-        st.slider('In **China** (The current solar use is about ' \
+        st.slider('In **China** (The solar use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "China")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
                 min_value=6.0,
@@ -388,7 +388,7 @@ with tab2:
                 format="%.1f EJ/yr",
                 key="solar_use_2030_China")
         
-        st.slider('In the **rest of the world** (The current solar use is about ' \
+        st.slider('In the **rest of the world** (The solar use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "RoW")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
                 min_value=8.0,
