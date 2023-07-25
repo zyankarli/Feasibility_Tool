@@ -185,12 +185,6 @@ tab1, tab2 = st.tabs(["Globe", "Regions"])
 
 #TAB GLOBAL
 with tab1:
-    #FUNCTIONS
-    def update_slider_vals():
-        coal_use_2030_per = round(100 - (float(st.session_state['coal_use_2030_world']) / \
-                                         round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median())) *100))
-        return coal_use_2030_per
-    coal_use_2030_per = update_slider_vals()
     #STATEMENTS
     #Until when is it feasible to phase out coal
     col_l, col_m, col_r = st.columns(3)
@@ -202,9 +196,11 @@ with tab1:
                 value = 1,
                 step = 5,
                 format="%.1f EJ/yr",
-                key = "coal_use_2030_world",
-                on_change = update_slider_vals)
-        st.write("The current choice implies a reduction of coal consumption by "+str(coal_use_2030_per)+ "%")
+                key = "coal_use_2030_world")
+        st.write("The current choice implies a reduction of coal consumption by "+
+                 str(round(100 - (float(st.session_state['coal_use_2030_world']) / \
+                                         round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median())) *100)))+
+                   "%")
         st.slider('What is the feasible **maximium** of global solar power used globally for elecricity generation in 2030? (The global coal use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
