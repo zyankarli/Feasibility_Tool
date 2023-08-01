@@ -266,7 +266,8 @@ with tab1:
         #set order of scenario_narratives for plot
         filter_df_world["scenario_narrative"] = pd.Categorical(filter_df_world["scenario_narrative"], categories=["Cost Effective", "Instit", "NDC", "Current Policy"])
         filter_df_world["reduction_year"] = pd.Categorical(filter_df_world["reduction_year"], categories=["2030_CO2_redu", "2040_CO2_redu"])
-        filter_df_world = filter_df_world.sort_values(by=["reduction_year","scenario_narrative"])
+        filter_df_world["model"] = pd.Categorical(filter_df_world["model"], categories=["AIM/CGE V2.2", "COFFEE 1.5", "GEM-E3_V2023", "IMAGE 3.2", "MESSAGEix-GLOBIOM_1.1", "POLES ENGAGE", "REMIND 3.0", "WITCH 5.0"])
+        filter_df_world = filter_df_world.sort_values(by=["reduction_year","scenario_narrative", "model"])
 
         #TODO: test for each scenario, how many models (unique) are still present. When this number drops below 3, set the reduction_value of all respective rows to 0
         #(filter_df_world[(filter_df_world["reduction_year"] == '2030_CO2_redu')].groupby('scenario')['model']))
@@ -288,7 +289,7 @@ with tab1:
 
             # Add subplot titles
             fig_world.update_layout(
-                annotations=[dict(text=str(year), xref="x" + str(i + 1), yref="paper", x=0.5, y=1.1, showarrow=False) for i, year in enumerate(filter_df_world["reduction_year"].unique())]
+                annotations=[dict(text=str(year), xref="x" + str(i + 1), yref="paper", x=1.5, y=1.05, showarrow=False) for i, year in enumerate(filter_df_world["reduction_year"].unique())]
             )
 
             # Create a scatterplot for each model
@@ -318,7 +319,9 @@ with tab1:
             legend=dict(
                 traceorder="normal",
                 itemsizing="constant"
-            )
+            ),
+            height=800,  # Change this value to your desired height in pixels
+            width=1200   # Change this value to your desired width in pixels
         )
 
         #print output
