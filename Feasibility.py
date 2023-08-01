@@ -23,6 +23,15 @@ hide_default_format = """
 
 st.markdown(hide_default_format, unsafe_allow_html=True)
 
+#change gap between sliders using CCS hack
+hack = """
+<style>
+    div[data-testid="stVerticalBlock"] {gap: 0rem;}
+</style>
+"""
+st.markdown(hack, unsafe_allow_html=True)
+
+
 #CCS links:
 ## https://discuss.streamlit.io/t/remove-or-reduce-spaces-between-elements/23283
 
@@ -337,11 +346,10 @@ with tab1:
 with tab2:
     #STATEMENTS
     #Until when is it feasible to phase out coal
-    col_l, col_m, col_r = st.columns(3)
-    with col_m:
-        st.write("### Feasibility concerns")
+    col_l, col_r = st.columns([0.3, 0.7])
     with col_l:
-        st.write("#### Feasible **minimum** of coal used for electricity generation in 2030:") # round off min value
+        st.write("## Feasibility concerns")
+        st.write("**Feasible _minimum_ of coal used for electricity generation in 2030:**") # round off min value
         st.slider('In **OECD** (The coal use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Coal"].median()))) \
                 + "EJ/yr)",
@@ -371,8 +379,8 @@ with tab2:
                 step=1.0,
                 format="%.1f EJ/yr",
                 key="coal_use_2030_RoW")
-    with col_r:
-        st.write("#### Feasible **maximum** of solar power used for electricity generation in 2030:")
+        
+        st.write("**Feasible _maximum_ of solar power used for electricity generation in 2030:**")
         st.slider('In **OECD** (The solar use in 2020 was about ' \
                 + str(round(float(df[(df["year"] == 2020) & (df["region"] == "OECD")]["Secondary Energy|Electricity|Solar"].median()))) \
                 + "EJ/yr)",
@@ -491,7 +499,7 @@ with tab2:
             # Add subplot titles
             fig.update_layout(
                 annotations=[dict(text=str(year), 
-                                  xref="x" + str(i + 1), yref="paper", x=0.5, y=1.1,
+                                  xref="x" + str(i + 1), yref="paper", x=0.5, y=1,
                                   showarrow=False) for i, year in enumerate(region_order)]
             )
 
@@ -522,81 +530,88 @@ with tab2:
         legend=dict(
             traceorder="normal",
             itemsizing="constant"
-        )
+        ),
+        height=800,  # Change this value to your desired height in pixels
+        width=1200   # Change this value to your desired width in pixels
     )
     fig.update_xaxes(title_text="Scenario Narrative", col=2)
 
     
-
-    #print output
-    col1, col2 = st.columns([0.3, 0.7])
-    with col1:
-        st.write('### Regional Policy Implications')
-    with col2:
+    with col_r:
         st.plotly_chart(fig, theme="streamlit")
+    
+st.write("#") #insert whitespace
+st.write("#") #insert whitespace
+st.write("#") #insert whitespace
 
-        #SECOND PLOT SIS KEBAB
-        filter_df = to_plot_df[(to_plot_df["reduction_year"] == '2030_CO2_redu') & (to_plot_df['region'] != "World")]
-        filter_df["region"] = pd.Categorical(filter_df["region"], categories=["OECD", "China", "RoW"])
+col1, col2 = st.columns([0.3, 0.7])
+with col1:
+    st.write('### Regional Policy Implications')
+    st.write('To be defined.')
 
-        selected_model = st.selectbox("Selected model", filter_df["model"].unique())
+    
+with col2:
+    #SECOND PLOT SIS KEBAB
+    filter_df = to_plot_df[(to_plot_df["reduction_year"] == '2030_CO2_redu') & (to_plot_df['region'] != "World")]
+    filter_df["region"] = pd.Categorical(filter_df["region"], categories=["OECD", "China", "RoW"])
 
-        color_mapping = {
-                    'Current Policy': "red",
-                    'NDC': "orange",
-                    'Cost Effective': "blue",
-                    'Instit': "green"
-                }
-        # Map colors based on the "model" column
+    selected_model = st.selectbox("Selected model", filter_df["model"].unique())
 
-        fig2 = go.Figure()
-        # Bar plot for the range of reduction_value for each region
-        bar_data = filter_df[(filter_df['model'] == selected_model)].groupby(["region", "scenario_narrative"])["reduction_value"].agg(['min', 'max']).reset_index()
-        bar_data = bar_data.sort_values(by=['region', 'min']).groupby('region').apply(lambda group: group.assign(max=group['max'].shift(-1))).reset_index(drop=True).dropna().reset_index(drop=True)
-
-
-        fig2.add_trace(go.Bar(
-            x=bar_data["region"],
-            base=bar_data["min"],  # Use the minimum value as the base of the bar
-            y=bar_data["max"] - bar_data["min"],  # Use the difference between max and min values as the height of the bar
-            width=0.005,  # Adjust the width of the bars as desired
-            marker=dict(color='black'),  # Set the color of the bars
-            #name=region + " Bar (reduction_value)",  # Add region name to the legend
-            showlegend=False,  # Hide the legend for the bars
-        ))
+    color_mapping = {
+                'Current Policy': "red",
+                'NDC': "orange",
+                'Cost Effective': "blue",
+                'Instit': "green"
+            }
+    # Map colors based on the "model" column
+    fig2 = go.Figure()
+    # Bar plot for the range of reduction_value for each region
+    bar_data = filter_df[(filter_df['model'] == selected_model)].groupby(["region", "scenario_narrative"])["reduction_value"].agg(['min', 'max']).reset_index()
+    bar_data = bar_data.sort_values(by=['region', 'min']).groupby('region').apply(lambda group: group.assign(max=group['max'].shift(-1))).reset_index(drop=True).dropna().reset_index(drop=True)
 
 
-        for scenario_narrative, color in color_mapping.items():
-            # Create a scatter trace for each scenario narrative
-            scatter_trace = go.Scatter(
-                x=filter_df[(filter_df['model'] == selected_model) & (filter_df['scenario_narrative'] == scenario_narrative)]["region"],
-                y=filter_df[(filter_df['model'] == selected_model) & (filter_df['scenario_narrative'] == scenario_narrative)]["reduction_value"],
-                mode="markers",
-                marker=dict(
-                    symbol = "triangle-up",
-                    color=color,
-                    size=20,
-                    opacity=1
-                ),
-                name=scenario_narrative,  # Set the name for the legend
-                showlegend=True,  # Show the legend for each trace
-                hoverinfo='all'
-            )
+    fig2.add_trace(go.Bar(
+        x=bar_data["region"],
+        base=bar_data["min"],  # Use the minimum value as the base of the bar
+        y=bar_data["max"] - bar_data["min"],  # Use the difference between max and min values as the height of the bar
+        width=0.005,  # Adjust the width of the bars as desired
+        marker=dict(color='black'),  # Set the color of the bars
+        #name=region + " Bar (reduction_value)",  # Add region name to the legend
+        showlegend=False,  # Hide the legend for the bars
+    ))
 
-            fig2.add_trace(scatter_trace)
-            
-        fig2.update_layout(
-            title=go.layout.Title(
-                text="CO2 reductions until 2030 <br><sup>per scenario</sup>",
-                xref="paper",
-                x=0
+
+    for scenario_narrative, color in color_mapping.items():
+        # Create a scatter trace for each scenario narrative
+        scatter_trace = go.Scatter(
+            x=filter_df[(filter_df['model'] == selected_model) & (filter_df['scenario_narrative'] == scenario_narrative)]["region"],
+            y=filter_df[(filter_df['model'] == selected_model) & (filter_df['scenario_narrative'] == scenario_narrative)]["reduction_value"],
+            mode="markers",
+            marker=dict(
+                symbol = "triangle-up",
+                color=color,
+                size=20,
+                opacity=1
             ),
-            # xaxis=dict(title="Scenario Narrative"),
-            yaxis=dict(title="Necessary CO2 Reduction (%)", range=[-0.3, 0.65], tickformat="2%"),
-            legend=dict(
-                traceorder="reversed",
-                itemsizing="constant"
-            )
+            name=scenario_narrative,  # Set the name for the legend
+            showlegend=True,  # Show the legend for each trace
+            hoverinfo='all'
         )
 
-        st.plotly_chart(fig2, theme='streamlit')
+        fig2.add_trace(scatter_trace)
+        
+    fig2.update_layout(
+        title=go.layout.Title(
+            text="CO2 reductions until 2030 <br><sup>per scenario</sup>",
+            xref="paper",
+            x=0
+        ),
+        # xaxis=dict(title="Scenario Narrative"),
+        yaxis=dict(title="Necessary CO2 Reduction (%)", range=[-0.3, 0.65], tickformat="2%"),
+        legend=dict(
+            traceorder="reversed",
+            itemsizing="constant"
+        )
+    )
+
+    st.plotly_chart(fig2, theme='streamlit')
