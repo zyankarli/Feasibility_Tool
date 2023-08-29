@@ -55,16 +55,16 @@ def get_data():
     #IIASA
     #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
-    #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
+    iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
-    pyam.iiasa.Connection()
+    # pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
+    # pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        #creds = iiasa_creds,
+        creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
@@ -450,8 +450,8 @@ else:
         width=1000   # Change this value to your desired width in pixels
     )
 
-coll, colm, colr = st.columns([0.6, 0.3, 0.2], gap="small")
-with colm:
+coll, colm, colr = st.columns([0.6, 0.1, 0.25], gap="small")
+with colr:
     st.write("")
     st.markdown("""<p class="body-font"> <b>Your current choice implies:<b> </p>""", unsafe_allow_html=True)
     st.metric('Number of models finding scenarios to stay below 2C',
@@ -489,7 +489,7 @@ with colm:
         """	
         ## Effects on short-term CO2 reduction
     
-    <p class="body-font"> Let's now look at the difference between the conventional,  cost-effective scenarios and the set of scenarios <br />
+    <p class="body-font"> Let's now look at the difference between the conventional,  cost-effective scenarios and the set of scenarios 
     that consider institutional feasibility. The figure below shows the difference in CO2 emissions between these two scenarios.
     Colored lines are the delta-values for each model, the black dashed line is the median of all models.
     </p>
@@ -577,8 +577,10 @@ subplots.update_yaxes(showticklabels=False, row=1, col=3,
                       tickfont=dict(size=font_size_axis))
 subplots.update_layout(
     title = go.layout.Title(
-        text="Difference of CO2 emissions between cost effective and instutional constrained scenarios",
+        text="Difference of CO2 emissions <br><sup> between cost effective and instutional constrained scenarios </sup>",
         x=0, 
+        xanchor = 'left',
+        yanchor = 'top',
         font = dict(size = font_size_title)),
     yaxis=dict(title="", tickfont=dict(size=font_size_axis)),
     #yaxis=dict(title="", range=[-0.2, 0.6]),
@@ -594,7 +596,7 @@ subplots.update_layout(
 
 coll, colm, colr = st.columns([0.2, 0.6, 0.2])
 with colm:
-    st.plotly_chart(subplots, theme="streamlit", config=config)
+    st.plotly_chart(subplots, theme="streamlit", config=config, use_container_width=True)
 
 
 coll, colm, colr = st.columns([0.4, 0.6, 0.2])
