@@ -500,11 +500,11 @@ with colm:
 #----------------------------#
 #from df, get the difference between Cost Effective and Instit for all years and each model and call it delta
 # filter relevant columns
-to_plot = df[(df['scenario'].isin(["T34_1000_govem", "T34_1000_ref"])) & (df['year'] >= 2020) & (df['year'] <= 2050) & (df['region'] != "World")]
+to_plot = df[(df['scenario'].isin(["T34_1000_bitb_em", "T34_1000_ref"])) & (df['year'] >= 2020) & (df['year'] <= 2050) & (df['region'] != "World")]
 # pivot to wide format
 to_plot = pd.pivot(data=to_plot, index=['model','region', "year"], columns = 'scenario', values = 'Emissions|CO2').reset_index()
 # calculate delta between all years
-to_plot['delta'] = to_plot['T34_1000_govem'] - to_plot['T34_1000_ref']
+to_plot['delta'] = to_plot['T34_1000_bitb_em'] - to_plot['T34_1000_ref']
 
 #set order for plot
 region_order = ['OECD', 'China', 'RoW']
