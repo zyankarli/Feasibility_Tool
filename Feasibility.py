@@ -463,7 +463,7 @@ with colr:
                 value = str(round(100 - (float(st.session_state['solar_use_2030_world']) / \
                                  round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median())) *-100))) + "%")
     st.metric('Need for a metric for CCS', 
-                value = 00)
+                value = 00) #TODO median absolute CCS deployment by 2050
 
 with coll:
     st.plotly_chart(fig_world, theme="streamlit", config=config)
@@ -472,7 +472,7 @@ with coll:
 coll, colm, colr = st.columns([0.4, 0.6, 0.2])
 with colm:
     st.markdown("""
-    ### Key takeaways I
+    ### Key takeaway for global CO2 reductions
 
     <p class="body-font">
                 \u2714 Considering institutional feasibility reduces the uncertainty of future emission reductions (indicated by shorter boxplots). </li></p>
@@ -602,7 +602,7 @@ with colm:
 coll, colm, colr = st.columns([0.4, 0.6, 0.2])
 with colm:
     st.markdown("""
-    ### Key takeaways II
+    ### Key takeaways for regional CO2 emission reductions
 
     <p class="body-font"> 
         \u2714 OECD member states are required to increase their short term mitigation actions. </br>
