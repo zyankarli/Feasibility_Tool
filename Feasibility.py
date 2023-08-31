@@ -657,17 +657,17 @@ with colm:
     st.plotly_chart(subplots, theme="streamlit", config=config, use_container_width=True)
 coll, colm1, colm2, colm3, colr = st.columns([0.3, 0.15, 0.15, 0.15, 0.2])
 with colm1:
-    st.metric("Feasibility-updated CO2 net-zero year <br> for OECD90+",
+    st.metric("Feasibility-updated CO2 net-zero year \n for OECD90+",
               value="2045",
               delta="",
               delta_color="off")
 with colm2:
-    st.metric("Feasibility-updated CO2 net-zero year <br> for China",
+    st.metric("Feasibility-updated CO2 net-zero year \n for China",
                 value="2050",
                 delta="10 years earlier than currenlty planned",
                 delta_color="off")
 with colm3:
-    st.metric("Feasibility-updated CO2 net-zero year <br> for RoW",
+    st.metric("Feasibility-updated CO2 net-zero year \n for RoW",
                 value="2070")
 
 coll, colm, colr = st.columns([0.4, 0.6, 0.2])
