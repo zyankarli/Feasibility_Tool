@@ -246,7 +246,7 @@ with coll:
     , unsafe_allow_html=True)
 with colm:
     #import images
-    regions_image = Image.open("data\IAM_regions.png")
+    regions_image = Image.open("data/IAM_regions.png")
     st.image(regions_image)
     
     st.markdown(
@@ -713,5 +713,5 @@ with colm:
 
 coll, colm, colr = st.columns([0.5, 0.33, 0.33])
 with colm:
-    ENGAGE_logo = Image.open("data\ENGAGE_logo.png")
+    ENGAGE_logo = Image.open("data/ENGAGE_logo.png")
     st.image(ENGAGE_logo)
