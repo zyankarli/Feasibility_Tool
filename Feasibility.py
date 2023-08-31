@@ -238,7 +238,7 @@ with coll:
         """
     ## Regions of specific interest
 
-    <p class="body-font"> The OECD90+ countries and China are the world's greatest emitter of CO2. <br />
+    <p class="body-font"> The OECD90+ countries and China are the world's greatest emitter of CO2.
     Therefore, the results below highlight these two regions and compare them to the rest of the world (RoW).
     The table to the right shows the regional grouping that was applied to derive those three regions. <br />
     </p>
@@ -677,8 +677,8 @@ with colm:
 
     <p class="body-font"> 
         \u2714 OECD90+ countries are required to significantly increase their short term mitigation actions. </br>
-               &nbsp; &nbsp; Compared to the cost-effective scenarios, feasibility constraint scenarios require OECD90+ countries to reduce their </br>
-               &nbsp; &nbsp; CO2 emissions by additional 26% by 2040. </br> 
+               &nbsp; &nbsp; Compared to the cost-effective scenarios, feasibility constraint scenarios require OECD90+ countries to reduce their
+               CO2 emissions by additional 26% by 2040. </br> 
         \u2714 China's mitigation effort needs to increase from 2040 onwards.</br>
         &nbsp; &nbsp; The country is expected to reduce around 10% more of its CO2 emission until 2050 compared to <br>
         &nbsp; &nbsp; a cost-effective scenario. </br>
