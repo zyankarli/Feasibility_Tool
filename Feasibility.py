@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
+from PIL import Image
 
 
 st.set_page_config(
@@ -53,18 +54,18 @@ st.markdown("""
 def get_data():
     #get IIASA identification
     #IIASA
-    iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
+    #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
     #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    # pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
-    # pyam.iiasa.Connection()
+    pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
+    pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        creds = iiasa_creds,
+        #creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
@@ -106,9 +107,7 @@ def get_data():
 
 df = get_data().data
 
-st.write("Countries of Sub-Saharan Africa" == "Countries of Sub-Saharan Africa")
-
-#DATA WRANGLING
+##DATA WRANGLING
 #get regional groupings
 ## OECD: "North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)"
 #TODO Clarify that countries of Asia and Latin America are missing
@@ -129,13 +128,7 @@ china.loc[:, "region"] = "China"
 row = df[~df["region"].isin(["World", "North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)", "Pacific OECD", "Countries of centrally-planned Asia; primarily China"])]\
         .groupby(["model", "scenario", "variable", "year", "unit"])\
             .agg({"value": "sum"}).reset_index()
-
 row["region"] = "RoW"
-
-#print unique row regions
-st.write(df[~df["region"].isin(["World", "North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)", "Pacific OECD", "Countries of centrally-planned Asia; primarily China"])]['region'].unique())
-st.write(df['region'].unique() )
-
 #Concat four regions
 df = pd.concat([world, oecd, china, row]).reset_index()
 
@@ -215,21 +208,23 @@ to_plot_df['ccs_use_2050'] = to_plot_df['ccs_use_2050'].fillna(6000)
 
 
 #NEW TEXT
+#Title
+st.markdown("""# What do feasibility constraints imply for short-term climate mitiation?""", unsafe_allow_html=True)
 #Introduction
-coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+coll, colm, colr = st.columns([0.4, 0.6, 0.4])
 with colm:
     st.markdown(
         """	
         ## Introduction
     
-    <p class="body-font"> Integrated assessment models (IAMs) are a critical tool for climate mitigation planning. <br />
-    IAMs identify solutions to achieve a climate target while minising the occuring costs.  <br />
-    Thereby, IAMs are criticised for developing unfeasible scenarios that place a majority  <br />
-        of climate mitigation actions in the Global South, disregarding governance systems and <br />
-        institutional capacities.  <br />
-    (Visual graphic, showing the proportion of climate mitigation actions in the Global South) <br />
+    <p class="body-font"> Integrated assessment models (IAMs) are a critical tool for climate mitigation planning and are often used to inform political decision making.
+    IAMs are especially useful, because they identify solutions to achieve a climate target while minising the occuring costs to do so.
+    As the usage of IAMs is mounting, critics point out the unfeasibility of many IAM generated scenarios.
+    Major points of critique are unfeasible assumptions about technological development (e.g. the speed of renewable technologies scale-up)
+    and the disregard for diverging governance systems and institutional capacities. For example, IAMs tend to place a majority
+    of climate mitigation actions in the Global South, as show in the image below. <br />
     <br />
-    How would the results of IAMs change if institutional constraints were taking into account?  <br />
+    How would the results of IAMs change if feasibility constraints were taking into account?  <br />
     Please scroll along to find out!
     </p>
         """
@@ -244,17 +239,19 @@ with coll:
     ## Regions of specific interest
 
     <p class="body-font"> The OECD90+ countries and China are the world's greatest emitter of CO2. <br />
-    Therefore, the results below highlight these two regions and compare them to the rest of the world (RoW). <br />
+    Therefore, the results below highlight these two regions and compare them to the rest of the world (RoW).
+    The table to the right shows the regional grouping that was applied to derive those three regions. <br />
     </p>
     """
     , unsafe_allow_html=True)
 with colm:
-    st.markdown("![Alt Text](https://upload.wikimedia.org/wikipedia/commons/4/4c/OECD_member_states_map.svg)")
+    #import images
+    regions_image = Image.open("data\IAM_regions.png")
+    st.image(regions_image)
+    
     st.markdown(
         """
-    <p class="body-font"> Map showing the founding members of the OECD (1961) in dark blue and other members in light blue. <br />
-    Source: https://commons.wikimedia.org/wiki/File:OECD_member_states_map.svg
-    </p>
+    <p class="body-font"> 
     """
     , unsafe_allow_html=True)
 
@@ -265,10 +262,12 @@ with coll:
     st.markdown("""
                 ## Feasibility concerns
 
-                <p class="body-font"> 8 different IAMs to explore the effects of instituional and other feasibility constraints
-                impact global climate mitigation scenarios.
+                <p class="body-font"> 
+                On the technical side, feasibility constraints affect the speed and scale at which renewable technologies can be depolyed.
+                Other the institutional side, feasibility constraints limit the possible climate mitigation actions. This phenomenon is proxied by different carbon prices.
+                8 different IAMs explore global climate mitigation scenarios in a feasibility constrained as well as in a conventional, cost-effective setting.
                 You can adjust the sliders to the right to explore how your personal feasiblity concerns are aligned with the modelled scenarios. 
-                The metrics to the left provide you with an immediate feedback on your choices. </br>
+                The metrics next to the figure provide you with an immediate feedback on your choices. </br>
                 </p>
                 <font size="3px"> <i> The intial settings of sliders is chosen is such a way, that all model findings are included. <i />            
                 """
@@ -442,12 +441,12 @@ else:
 
     fig_world.update_layout(
         title = go.layout.Title(
-        text="ENGAGE 2C scenarios <br><sup>Global CO2 reductions by 2030 and 2040 compared to 2020</sup>",
-        xref="paper",
-        x=0, 
-        font=dict(size=font_size_title)
+            text="ENGAGE 2C scenarios <br><sup>Global CO2 reductions by 2030 and 2040 compared to 2020</sup>",
+            xref="paper",
+            x=0, 
+            font=dict(size=font_size_title)
         ),
-        yaxis=dict(title="", range=[-0.6, 0], tickfont=dict(size=font_size_axis)),
+        yaxis=dict(title="relative reductions compared to 2020", range=[-0.6, 0], tickfont=dict(size=font_size_axis)),
 
         legend=dict(
         traceorder="normal",
@@ -460,19 +459,39 @@ else:
     )
 
 coll, colm, colr = st.columns([0.6, 0.1, 0.25], gap="small")
+
+st.write(
+    """
+    <style>
+    [data-testid="stMetricDelta"] svg {
+        display: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 with colr:
     st.write("")
     st.markdown("""<p class="body-font"> <b>Your current choice implies:<b> </p>""", unsafe_allow_html=True)
+    
+    #get model count for each scenario // better solution than radio because only scenario count changes
+    n_cost_eff = filter_df_world[filter_df_world['scenario_narrative'] == 'Cost Effective']['model'].nunique()
+    n_feasi = filter_df_world[filter_df_world['scenario_narrative'] == 'Feasibility Constraint']['model'].nunique()
     st.metric('Number of models finding scenarios to stay below 2C',
-              value = filter_df_world['model'].nunique())
+            value = filter_df_world['model'].nunique(), 
+            delta = '{cost_eff} for cost effective and {feasi} for feasibility constrained scenarios'.format(cost_eff=n_cost_eff, feasi=n_feasi), 
+            delta_color="off")
+            
     st.metric('Reduction of coal comsumption by 2030', 
-                value = str(round(100 - (float(st.session_state['coal_use_2030_world']) / \
-                                 round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median())) *100))) + "%")
+        value = str(round(100 - (float(st.session_state['coal_use_2030_world']) / \
+                    round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median())) *100))) + "%")
     st.metric('Solar power increase by 2030', 
-                value = str(round(100 - (float(st.session_state['solar_use_2030_world']) / \
-                                 round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median())) *-100))) + "%")
-    st.metric('Need for a metric for CCS', 
-                value = 00) #TODO median absolute CCS deployment by 2050
+            value = str(round(100 - (float(st.session_state['solar_use_2030_world']) / \
+                        round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median())) *-100))) + "%")        
+    #According to State of CDR report 2023, in 2020 only 2Mt CO2/yr were sequestered globally using CCS (DACCS and BECCS together)
+    st.metric('Fractional increase of global CCS deployment by 2050', 
+                        value = str(str(int(st.session_state['ccs_use_2050_world']/2)) + "x times more")) #TODO median absolute CCS deployment by 2050
 
 with coll:
     #only plot if filter_df_world is not empty
@@ -486,7 +505,7 @@ with colm:
     ### Key takeaway for global CO2 reductions
 
     <p class="body-font">
-                \u2714 Considering institutional feasibility reduces the uncertainty of future emission reductions (indicated by shorter boxplots). </li></p>
+                \u2714 Considering feasibility constraints reduces the uncertainty of future emission reductions, as indicated by shorter boxplots. </li></p>
     """,
 unsafe_allow_html=True) 
 
@@ -500,9 +519,9 @@ with colm:
         """	
         ## Effects on short-term CO2 reduction
     
-    <p class="body-font"> Let's now look at the difference between the conventional,  cost-effective scenarios and the set of scenarios 
+    <p class="body-font"> Let's now look at the difference between the conventional, cost-effective scenarios and the set of scenarios 
     that consider institutional feasibility. The figure below shows the difference in CO2 emissions between these two scenarios.
-    Colored lines are the delta-values for each model, the black dashed line is the median of all models.
+    Colored lines are the delta-values for each model, the black line is the median of all models.
     </p>
         """
     , unsafe_allow_html=True)
@@ -566,12 +585,40 @@ for i, region in enumerate(region_order, 1):
         x=median_df[median_df['region'] == region]['year'],
         y=median_df[median_df['region'] == region]['delta'],
         mode='lines',
-        line=dict(color='black', width=4, dash='dash'),
+        line=dict(color='black', width=4, dash='solid'),
         showlegend=False, 
         hoverinfo = 'skip'
         ),
     row=1, col=i,
     )
+
+       # Add horizontal line at y=0
+    subplots.add_shape(
+        type="line",
+        x0=2020,
+        y0=0,
+        x1=2050,
+        y1=0,
+        line=dict(color="grey", width=2, dash="dash"),
+        row=1,
+        col=i
+    )
+    
+    # Add text annotation above the line
+    subplots.add_annotation(
+        xref="paper",
+        yref="paper",
+        x=0.90,
+        y=0.43,
+        text="CO2 emission reductions <br> in cost-effective scenarios </br> are the baseline",
+        showarrow=True,
+        arrowhead=1,
+        arrowcolor="grey",
+        ax=0,
+        ay=40,
+        font=dict(size=16)
+    )
+
     #set x-ticks size
     subplots.update_xaxes(tickfont=dict(size = font_size_axis), row=1, col=i)
     #set subtitles size
@@ -593,7 +640,7 @@ subplots.update_layout(
         xanchor = 'left',
         yanchor = 'top',
         font = dict(size = font_size_title)),
-    yaxis=dict(title="", tickfont=dict(size=font_size_axis)),
+    yaxis=dict(title="Mt CO2/yr", tickfont=dict(size=font_size_axis)),
     #yaxis=dict(title="", range=[-0.2, 0.6]),
     # legend=dict(
     #     traceorder="normal",
@@ -608,7 +655,20 @@ subplots.update_layout(
 coll, colm, colr = st.columns([0.2, 0.6, 0.2])
 with colm:
     st.plotly_chart(subplots, theme="streamlit", config=config, use_container_width=True)
-
+coll, colm1, colm2, colm3, colr = st.columns([0.3, 0.15, 0.15, 0.15, 0.2])
+with colm1:
+    st.metric("Feasibility-updated CO2 net-zero year for OECD90+",
+              value="2045",
+              delta="",
+              delta_color="off")
+with colm2:
+    st.metric("Feasibility-updated CO2 net-zero year for China",
+                value="2050",
+                delta="10 years earlier than currenlty planned",
+                delta_color="off")
+with colm3:
+    st.metric("Feasibility-updated CO2 net-zero year for RoW",
+                value="2070")
 
 coll, colm, colr = st.columns([0.4, 0.6, 0.2])
 with colm:
@@ -616,10 +676,42 @@ with colm:
     ### Key takeaways for regional CO2 emission reductions
 
     <p class="body-font"> 
-        \u2714 OECD90+ countries are required to increase their short term mitigation actions. </br>
-        \u2714 China is required to increase its long term mitigation action.</br>
-        \u2714 The Rest of the World is expected to have higher future CO2 emissions.</br>
+        \u2714 OECD90+ countries are required to significantly increase their short term mitigation actions. </br>
+               &nbsp; &nbsp; Compared to the cost-effective scenarios, feasibility constraint scenarios require OECD90+ countries to reduce their </br>
+               &nbsp; &nbsp; CO2 emissions by additional 26% by 2040. </br> 
+        \u2714 China's mitigation effort needs to increase from 2040 onwards.</br>
+        &nbsp; &nbsp; The country is expected to reduce around 10% more of its CO2 emission until 2050 compared to <br>
+        &nbsp; &nbsp; a cost-effective scenario. </br>
+        \u2714 The Rest of the World is expected to have lower CO2 reductions compared to a cost-effective scenario.</br>
+        &nbsp; &nbsp; CO2 emissions reductions in these regions are expected to be around 20% lower when <br>
+        &nbsp; &nbsp; considering feasibility constraints.
         </p>
     """,
 unsafe_allow_html=True) 
 
+
+st.markdown("""****""")
+
+coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+with colm:
+    st.markdown(""" <br /> <br /> <br />""", unsafe_allow_html=True) 
+    st.markdown("""
+    <p class = "body-font"> Implications of those findings for temperature/ climate goals will be added soon. </p>
+    """,unsafe_allow_html=True)
+
+st.markdown("""****""")
+
+st.markdown(""" <br /> <br /> <br />""", unsafe_allow_html=True) 
+
+coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+with colm:
+    st.markdown("## Hungry for more?")
+    st.markdown(""" <p class = "body-font"> 
+            For more information on feasibility constraint climate mitigation scenarios read Betram et al. (2023) in work. </br>
+            To learn how feasiblity constraints affect the regional mitigation efforts necessary to reach climate targets read Brutschin et al. (2023) in work. </br>
+            These papers as well as this web app are part of the <a href="https://iiasa.ac.at/projects/engage">international ENGAGE project</a> funded by the European Commission’s Horizon 2020 research and innovation programme under grant agreement No 821471. </p>""", unsafe_allow_html=True)
+
+coll, colm, colr = st.columns([0.5, 0.33, 0.33])
+with colm:
+    ENGAGE_logo = Image.open("data\ENGAGE_logo.png")
+    st.image(ENGAGE_logo)
