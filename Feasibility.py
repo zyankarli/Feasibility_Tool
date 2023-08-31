@@ -656,6 +656,7 @@ coll, colm, colr = st.columns([0.2, 0.6, 0.2])
 with colm:
     st.plotly_chart(subplots, theme="streamlit", config=config, use_container_width=True)
 coll, colm1, colm2, colm3, colr = st.columns([0.3, 0.15, 0.15, 0.15, 0.2])
+#TODO: manage to insert line break into metric title
 with colm1:
     st.metric("Feasibility-updated CO2 net-zero year \n for OECD90+",
               value="2045",
