@@ -21,8 +21,8 @@ hide_default_format = """
        header {visibility: hidden;}
        </style>
        """
-
-st.markdown(hide_default_format, unsafe_allow_html=True)
+#uncomment to hide menu and footer
+#st.markdown(hide_default_format, unsafe_allow_html=True)
 
 #hide fullscreen button for plots
 hide_img_fs = '''
@@ -53,23 +53,23 @@ st.markdown("""
 def get_data():
     #get IIASA identification
     #IIASA
-    #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
+    iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
     #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
-    pyam.iiasa.Connection()
+    # pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
+    # pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        #creds = iiasa_creds,
+        creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
             "T34_1000_feas_em",
-            "T34_1000_bitb_em",
+            "T34_1000_bitb_em", # "feasible" scenarios
             "T34_1000_bitb_ref",
             "T34_1000_enab_em",
             "T34_NPi2100",
@@ -94,7 +94,7 @@ def get_data():
                 "Pacific OECD",
                 "Countries of centrally-planned Asia; primarily China",
                 "Countries of South Asia; primarily India",
-                "Other countries of Asia"
+                "Other countries of Asia",
                 "Countries of Sub-Saharan Africa",
                 "Countries of Latin America and the Caribbean",
                 "Countries of the Middle East; Iran, Iraq, Israel, Saudi Arabia, Qatar, etc.",
@@ -105,6 +105,8 @@ def get_data():
     return df
 
 df = get_data().data
+
+st.write("Countries of Sub-Saharan Africa" == "Countries of Sub-Saharan Africa")
 
 #DATA WRANGLING
 #get regional groupings
@@ -119,7 +121,7 @@ world.loc[:, "region"] = "World"
 oecd = df[df["region"].isin(["North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)", "Pacific OECD"])]\
     .groupby(["model", "scenario", "variable", "year", "unit"])\
         .agg({"value": "sum"}).reset_index()
-oecd['region'] = "OECD"
+oecd['region'] = "OECD90+"
 #get China
 china = df[df['region'] == "Countries of centrally-planned Asia; primarily China"]
 china.loc[:, "region"] = "China"
@@ -127,9 +129,17 @@ china.loc[:, "region"] = "China"
 row = df[~df["region"].isin(["World", "North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)", "Pacific OECD", "Countries of centrally-planned Asia; primarily China"])]\
         .groupby(["model", "scenario", "variable", "year", "unit"])\
             .agg({"value": "sum"}).reset_index()
+
 row["region"] = "RoW"
+
+#print unique row regions
+st.write(df[~df["region"].isin(["World", "North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)", "Pacific OECD", "Countries of centrally-planned Asia; primarily China"])]['region'].unique())
+st.write(df['region'].unique() )
+
 #Concat four regions
 df = pd.concat([world, oecd, china, row]).reset_index()
+
+
 
 #from long to wide
 df = pd.pivot(data=df, index=['model','scenario', 'region', 'year'], columns = 'variable', values = 'value').reset_index()
@@ -152,7 +162,7 @@ df["Share_Gas"] = df["Primary Energy|Gas"] / df["Primary Energy"]
 #GET DATA TO PLOT
 #filter
 #to_plot_df = df[(df['year'].isin([2020, 2030, 2040])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_govem"])) & (df["region"] == "World")] #old approach
-to_plot_df = df[(df['year'].isin([2020, 2030, 2040, 2050])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_govem", 'T34_NDC2100', 'T34_NPi2100']))] #without world filter
+to_plot_df = df[(df['year'].isin([2020, 2030, 2040, 2050])) & (df["scenario"].isin(["T34_1000_ref", "T34_1000_bitb_em"]))] #without world filter
 
 
 
@@ -233,7 +243,7 @@ with coll:
         """
     ## Regions of specific interest
 
-    <p class="body-font"> The OECD member countries and China are the world's greatest emitter of CO2. <br />
+    <p class="body-font"> The OECD90+ countries and China are the world's greatest emitter of CO2. <br />
     Therefore, the results below highlight these two regions and compare them to the rest of the world (RoW). <br />
     </p>
     """
@@ -365,24 +375,23 @@ color_mapping = {
 'WITCH 5.0': "rgb(0, 128, 0)"
 }
 
+#set plotly configuarations
+config = {'displayModeBar': False}
+font_size_title = 22
+font_size_axis = 16
 
 if filter_df_world.empty:
     st.write("Chosen values out of scenario space! Please chose another input combination.")
 else:
 #FIGURES
-    #set plotly configuarations
-    config = {'displayModeBar': False}
-    font_size_title = 22
-    font_size_axis = 16
-
     # Map colors based on the "model" column
     filter_df_world["color"] = filter_df_world["model"].map(color_mapping)
 
     #change values of columns for nicer display
-    filter_df_world['scenario_narrative'] = filter_df_world['scenario_narrative'].replace({"Cost Effective": "Cost Effective", "Instit": "Institutional Constraints"})
+    filter_df_world['scenario_narrative'] = filter_df_world['scenario_narrative'].replace({"Cost Effective": "Cost Effective", "Tech+Inst": "Feasibility Constraint"})
     filter_df_world["reduction_year"] = filter_df_world["reduction_year"].replace({"2030_CO2_redu": "2030", "2040_CO2_redu": "2040"})
     #set order of scenario_narratives for plot
-    filter_df_world["scenario_narrative"] = pd.Categorical(filter_df_world["scenario_narrative"], categories=["Cost Effective", "Institutional Constraints", "NDC", "Current Policy"])
+    filter_df_world["scenario_narrative"] = pd.Categorical(filter_df_world["scenario_narrative"], categories=["Cost Effective", "Feasibility Constraint", "NDC", "Current Policy"])
     filter_df_world["reduction_year"] = pd.Categorical(filter_df_world["reduction_year"], categories=["2030", "2040"])
     filter_df_world["model"] = pd.Categorical(filter_df_world["model"], categories=["AIM/CGE V2.2", "COFFEE 1.5", "GEM-E3_V2023", "IMAGE 3.2", "MESSAGEix-GLOBIOM_1.1", "POLES ENGAGE", "REMIND 3.0", "WITCH 5.0"])
     filter_df_world = filter_df_world.sort_values(by=["reduction_year","scenario_narrative", "model"])
@@ -466,7 +475,9 @@ with colr:
                 value = 00) #TODO median absolute CCS deployment by 2050
 
 with coll:
-    st.plotly_chart(fig_world, theme="streamlit", config=config)
+    #only plot if filter_df_world is not empty
+    if filter_df_world.empty != True:
+        st.plotly_chart(fig_world, theme="streamlit", config=config)
 
 
 coll, colm, colr = st.columns([0.4, 0.6, 0.2])
@@ -507,7 +518,7 @@ to_plot = pd.pivot(data=to_plot, index=['model','region', "year"], columns = 'sc
 to_plot['delta'] = to_plot['T34_1000_bitb_em'] - to_plot['T34_1000_ref']
 
 #set order for plot
-region_order = ['OECD', 'China', 'RoW']
+region_order = ['OECD90+', 'China', 'RoW']
 to_plot['region'] = pd.Categorical(to_plot['region'], categories=region_order)
 
 #drop rows with delta value of zero (only COFFEE)
@@ -522,7 +533,7 @@ median_df = to_plot.groupby(['year', 'region'])['delta'].median().reset_index()
 
 
 color_mapping = {
-'OECD': "rgb(255, 0, 0)",
+'OECD90+': "rgb(255, 0, 0)",
 'China': "rgb(0, 255, 0)",
 'RoW': "rgb(0, 0, 255)"
 }
@@ -577,7 +588,7 @@ subplots.update_yaxes(showticklabels=False, row=1, col=3,
                       tickfont=dict(size=font_size_axis))
 subplots.update_layout(
     title = go.layout.Title(
-        text="Difference of CO2 emissions <br><sup> between cost effective and instutional constrained scenarios </sup>",
+        text="Difference of CO2 emissions <br><sup> between cost effective and feasibility constrained scenarios </sup>",
         x=0, 
         xanchor = 'left',
         yanchor = 'top',
@@ -605,7 +616,7 @@ with colm:
     ### Key takeaways for regional CO2 emission reductions
 
     <p class="body-font"> 
-        \u2714 OECD member states are required to increase their short term mitigation actions. </br>
+        \u2714 OECD90+ countries are required to increase their short term mitigation actions. </br>
         \u2714 China is required to increase its long term mitigation action.</br>
         \u2714 The Rest of the World is expected to have higher future CO2 emissions.</br>
         </p>
