@@ -14,6 +14,7 @@ st.set_page_config(
      initial_sidebar_state="collapsed",
      layout="wide")
 
+#CCS HACKING
 #hide menu and footer
 hide_default_format = """
        <style>
@@ -45,6 +46,18 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+#CCS hack to make arrows of metrics disappear
+st.write(
+    """
+    <style>
+    [data-testid="stMetricDelta"] svg {
+        display: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 #CCS links:
 ## https://discuss.streamlit.io/t/remove-or-reduce-spaces-between-elements/23283
@@ -106,6 +119,7 @@ def get_data():
     return df
 
 df = get_data().data
+
 
 ##DATA WRANGLING
 #get regional groupings
@@ -460,16 +474,6 @@ else:
 
 coll, colm, colr = st.columns([0.6, 0.1, 0.25], gap="small")
 
-st.write(
-    """
-    <style>
-    [data-testid="stMetricDelta"] svg {
-        display: none;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 with colr:
     st.write("")
@@ -480,9 +484,8 @@ with colr:
     n_feasi = filter_df_world[filter_df_world['scenario_narrative'] == 'Feasibility Constraint']['model'].nunique()
     st.metric('Number of models finding scenarios to stay below 2C',
             value = filter_df_world['model'].nunique(), 
-            delta = '{cost_eff} for cost effective and {feasi} for feasibility constrained scenarios'.format(cost_eff=n_cost_eff, feasi=n_feasi), 
-            delta_color="off")
-            
+            delta = '{cost_eff} cost effective / {feasi}  feasibility constrained'.format(cost_eff=n_cost_eff, feasi=n_feasi), 
+            delta_color="off")          
     st.metric('Reduction of coal comsumption by 2030', 
         value = str(round(100 - (float(st.session_state['coal_use_2030_world']) / \
                     round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median())) *100))) + "%")
@@ -608,7 +611,7 @@ for i, region in enumerate(region_order, 1):
     subplots.add_annotation(
         xref="paper",
         yref="paper",
-        x=0.90,
+        x=0.85,
         y=0.43,
         text="CO2 emission reductions <br> in cost-effective scenarios </br> are the baseline",
         showarrow=True,
@@ -655,20 +658,25 @@ subplots.update_layout(
 coll, colm, colr = st.columns([0.2, 0.6, 0.2])
 with colm:
     st.plotly_chart(subplots, theme="streamlit", config=config, use_container_width=True)
+
+coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+with colm:
+    st.markdown(""" <p class="body-font"> <b>Feasibility-updated CO2 net-zero years:</b> </p>""", unsafe_allow_html=True)
+
+
 coll, colm1, colm2, colm3, colr = st.columns([0.3, 0.15, 0.15, 0.15, 0.2])
-#TODO: manage to insert line break into metric title
 with colm1:
-    st.metric("Feasibility-updated CO2 net-zero year \n for OECD90+",
+    st.metric("For OECD90+",
               value="2045",
-              delta="",
-              delta_color="off")
+              delta="5 years earlier",
+              delta_color="inverse")
 with colm2:
-    st.metric("Feasibility-updated CO2 net-zero year \n for China",
+    st.metric("For China",
                 value="2050",
-                delta="10 years earlier than currenlty planned",
-                delta_color="off")
+                delta="10 years earlier",
+                delta_color="inverse")
 with colm3:
-    st.metric("Feasibility-updated CO2 net-zero year \n for RoW",
+    st.metric("For RoW",
                 value="2070")
 
 coll, colm, colr = st.columns([0.4, 0.6, 0.2])
