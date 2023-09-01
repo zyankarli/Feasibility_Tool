@@ -241,7 +241,7 @@ with colm:
         """
     , unsafe_allow_html=True)
 
-    engage_image = Image.open("data/ENGAGE_result.jpg")
+    engage_image = Image.open("data/ENGAGE_result.jpeg")
     st.image(engage_image,
              caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China. \
              Those regions are expected to decrease their CO2 emissions by 68% until 2050. More information on the regional grouping is provided below") 
