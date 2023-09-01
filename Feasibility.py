@@ -236,14 +236,20 @@ with colm:
     As the usage of IAMs is mounting, critics point out the unfeasibility of many IAM generated scenarios.
     Major points of critique are unfeasible assumptions about technological development (e.g. the speed of renewable technologies scale-up)
     and the disregard for diverging governance systems and institutional capacities. For example, IAMs tend to place a majority
-    of climate mitigation actions in the Global South, as show in the image below. <br />
-    <br />
-    How would the results of IAMs change if feasibility constraints were taking into account?  <br />
-    Please scroll along to find out!
+    of climate mitigation actions in the Global South, as show in the figure below. <br />
     </p>
         """
     , unsafe_allow_html=True)
 
+    engage_image = Image.open("data/ENGAGE_result.jpg")
+    st.image(engage_image,
+             caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China. \
+             Those regions are expected to decrease their CO2 emissions by 68% until 2050. More information on the regional grouping is provided below") 
+
+    st.markdown(""" <p class="body-font">
+                 How would the results of IAMs change if feasibility constraints were taking into account?  <br />
+                Please scroll along to find out!
+    </p> """, unsafe_allow_html=True)
 st.markdown("""****""")
 
 coll, colm, colr = st.columns([0.4, 0.6, 0.2])
