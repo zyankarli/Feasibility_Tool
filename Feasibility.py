@@ -24,7 +24,7 @@ hide_default_format = """
        </style>
        """
 #uncomment to hide menu and footer
-#st.markdown(hide_default_format, unsafe_allow_html=True)
+st.markdown(hide_default_format, unsafe_allow_html=True)
 
 #hide fullscreen button for plots
 hide_img_fs = '''
