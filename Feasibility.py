@@ -232,23 +232,21 @@ with colm:
         ## Introduction
     
     <p class="body-font"> Integrated assessment models (IAMs) are a critical tool for climate mitigation planning and are often used to inform political decision making.
-    IAMs are especially useful, because they identify solutions to achieve a climate target while minising the occuring costs to do so.
-    As the usage of IAMs is mounting, critics point out the unfeasibility of many IAM generated scenarios.
-    Major points of critique are unfeasible assumptions about technological development (e.g. the speed of renewable technologies scale-up)
-    and the disregard for diverging governance systems and institutional capacities. For example, IAMs tend to place a majority
-    of climate mitigation actions in the Global South, as show in the figure below. <br />
+    IAMs are especially useful, because they identify solutions to achieve a climate target given a wide range of constraints and technological details.
+    As the usage of IAMs is mounting, critics point out that some of the reported trajectories, such as the speed of mitigation in certain regions or scale up of certain technologies might not be feasible. For example, IAMs tend to place a majority
+    of climate mitigation actions in the regions outside of OECD+ and China+ as those have large techno-economic mitigation potential, as show in the figure below. <br />
     </p>
         """
     , unsafe_allow_html=True)
 
     engage_image = Image.open("data/ENGAGE_result.jpeg")
     st.image(engage_image,
-             caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China. \
-             Those regions are expected to decrease their CO2 emissions by 68% until 2050. More information on the regional grouping is provided below") 
+             caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China+. \
+             Those regions are expected to decrease their CO2 emissions by 68% until 2050 compared to 2020. More information on the regional grouping is provided below") 
 
     st.markdown(""" <p class="body-font">
-                 How would the results of IAMs change if feasibility constraints were taking into account?  <br />
-                Please scroll along to find out!
+                 How would the results of IAMs change if feasibility constraints were taken into account?  <br />
+                Please scroll down to find out!
     </p> """, unsafe_allow_html=True)
 st.markdown("""****""")
 
@@ -258,9 +256,10 @@ with coll:
         """
     ## Regions of specific interest
 
-    <p class="body-font"> The OECD90+ countries and China are the world's greatest emitter of CO2.
+    <p class="body-font"> The OECD90+ countries and China+ are among the key regions in the global mitigation efforts.
+    They cover a substantial share of global emissions and have the capacity to develop and deploy novel technologies.
     Therefore, the results below highlight these two regions and compare them to the rest of the world (RoW).
-    The table to the right shows the regional grouping that was applied to derive those three regions. <br />
+    The table to the right shows the regional grouping that was used to derive those three regions. <br />
     </p>
     """
     , unsafe_allow_html=True)
@@ -283,9 +282,10 @@ with coll:
                 ## Feasibility concerns
 
                 <p class="body-font"> 
-                On the technical side, feasibility constraints affect the speed and scale at which renewable technologies can be depolyed.
-                Other the institutional side, feasibility constraints limit the possible climate mitigation actions. This phenomenon is proxied by different carbon prices.
-                8 different IAMs explore global climate mitigation scenarios in a feasibility constrained as well as in a conventional, cost-effective setting.
+                On the technical side, feasibility constraints incorporate upper bounds on how fast low carbon and carbon removal technologies can be upscaled.
+                On the institutional side, feasibility constraints take into account that certain regions might not have the capacity to implement fast emissions reductions. 
+                Regional heterogeneity is introduced by carbon price differentiation and upper bounds on decadal emission reductions.
+                8 different IAMs explore global climate mitigation scenarios in a feasibility constrained as well as in a default, cost-effective setting.
                 You can adjust the sliders to the right to explore how your personal feasiblity concerns are aligned with the modelled scenarios. 
                 The metrics next to the figure provide you with an immediate feedback on your choices. </br>
                 </p>
@@ -695,10 +695,10 @@ with colm:
                &nbsp; &nbsp; Compared to the cost-effective scenarios, feasibility constraint scenarios require OECD90+ countries to reduce their
                CO2 emissions by additional 26% by 2040. </br> 
         \u2714 China's mitigation effort needs to increase from 2040 onwards.</br>
-        &nbsp; &nbsp; The country is expected to reduce around 10% more of its CO2 emission until 2050 compared to <br>
+        &nbsp; &nbsp; The country is expected to reduce around 10% more (median) of its CO2 emission until 2050 compared to <br>
         &nbsp; &nbsp; a cost-effective scenario. </br>
         \u2714 The Rest of the World is expected to have lower CO2 reductions compared to a cost-effective scenario.</br>
-        &nbsp; &nbsp; CO2 emissions reductions in these regions are expected to be around 20% lower when <br>
+        &nbsp; &nbsp; CO2 emissions reductions in these regions are expected to be around 20% lower (median) when <br>
         &nbsp; &nbsp; considering feasibility constraints.
         </p>
     """,
@@ -720,10 +720,10 @@ st.markdown(""" <br /> <br /> <br />""", unsafe_allow_html=True)
 
 coll, colm, colr = st.columns([0.4, 0.6, 0.2])
 with colm:
-    st.markdown("## Hungry for more?")
+    st.markdown("## Publications")
     st.markdown(""" <p class = "body-font"> 
-            For more information on feasibility constraint climate mitigation scenarios read Betram et al. (2023) in work. </br>
-            To learn how feasiblity constraints affect the regional mitigation efforts necessary to reach climate targets read Brutschin et al. (2023) in work. </br>
+            The presented results are based on scenario design as described in Bertram et al. (in preparation).</br>
+            The regional level figures and feasibility indicators are based on Brutschin et al. (in preparation) and Brutschin et al.(2021). </br>
             These papers as well as this web app are part of the <a href="https://iiasa.ac.at/projects/engage">international ENGAGE project</a> funded by the European Commission’s Horizon 2020 research and innovation programme under grant agreement No 821471. </p>""", unsafe_allow_html=True)
 
 coll, colm, colr = st.columns([0.5, 0.33, 0.33])
