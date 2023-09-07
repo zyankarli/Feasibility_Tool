@@ -233,7 +233,7 @@ with colm:
     
     <p class="body-font"> Integrated assessment models (IAMs) are a critical tool for climate mitigation planning and are often used to inform political decision making.
     IAMs are especially useful, because they identify solutions to achieve a climate target given a wide range of constraints and technological details.
-    As the usage of IAMs is mounting, critics point out that some of the reported trajectories, such as the speed of mitigation in certain regions or scale up of certain technologies might not be feasible. For example, IAMs tend to place a majority
+    As the usage of IAMs is mounting, critics point out that some of the reported trajectories, such as the speed of mitigation in certain regions or the scale up of certain technologies might not be feasible. For example, IAMs tend to place a majority
     of climate mitigation actions in the regions outside of OECD+ and China+ as those have large techno-economic mitigation potential, as show in the figure below. <br />
     </p>
         """
@@ -242,10 +242,10 @@ with colm:
     engage_image = Image.open("data/ENGAGE_result.jpeg")
     st.image(engage_image,
              caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China+. \
-             Those regions are expected to decrease their CO2 emissions by 68% until 2050 compared to 2020. More information on the regional grouping is provided below") 
+             Those regions are expected to decrease their CO2 emissions by 68% until 2050 compared to 2020. More information on the regional grouping is provided below.") 
 
     st.markdown(""" <p class="body-font">
-                 How would the results of IAMs change if feasibility constraints were taken into account?  <br />
+                 How would the results of IAMs change if feasibility constraints were taken into account? 
                 Please scroll down to find out!
     </p> """, unsafe_allow_html=True)
 st.markdown("""****""")
@@ -256,7 +256,7 @@ with coll:
         """
     ## Regions of specific interest
 
-    <p class="body-font"> The OECD90+ countries and China+ are among the key regions in the global mitigation efforts.
+    <p class="body-font"> The OECD90+ countries and China+ are among the key regions in global mitigation efforts.
     They cover a substantial share of global emissions and have the capacity to develop and deploy novel technologies.
     Therefore, the results below highlight these two regions and compare them to the rest of the world (RoW).
     The table to the right shows the regional grouping that was used to derive those three regions. <br />
@@ -691,15 +691,14 @@ with colm:
     ### Key takeaways for regional CO2 emission reductions
 
     <p class="body-font"> 
-        \u2714 OECD90+ countries are required to significantly increase their short term mitigation actions. </br>
-               &nbsp; &nbsp; Compared to the cost-effective scenarios, feasibility constraint scenarios require OECD90+ countries to reduce their
+        \u2714 OECD90+ countries are required to significantly increase their short term 
+        &nbsp; &nbsp; mitigation actions. Compared to the cost-effective scenarios, feasibility constraint scenarios require OECD90+ countries to reduce their
                CO2 emissions by additional 26% by 2040. </br> 
         \u2714 China's mitigation effort needs to increase from 2040 onwards.</br>
-        &nbsp; &nbsp; The country is expected to reduce around 10% more (median) of its CO2 emission until 2050 compared to <br>
-        &nbsp; &nbsp; a cost-effective scenario. </br>
+        &nbsp; &nbsp; The country is expected to reduce around 10% more (median) of its CO2 emissions
+        &nbsp; &nbsp; until 2050 compared to a cost-effective scenario. </br>
         \u2714 The Rest of the World is expected to have lower CO2 reductions compared to a cost-effective scenario.</br>
-        &nbsp; &nbsp; CO2 emissions reductions in these regions are expected to be around 20% lower (median) when <br>
-        &nbsp; &nbsp; considering feasibility constraints.
+        &nbsp; &nbsp; CO2 emissions reductions in these regions are expected to be around 20% lower (median) when considering feasibility constraints.
         </p>
     """,
 unsafe_allow_html=True) 
