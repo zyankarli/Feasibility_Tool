@@ -232,9 +232,9 @@ with colm:
         ## Introduction
     
     <p class="body-font"> Integrated assessment models (IAMs) are a critical tool for climate mitigation planning and are often used to inform political decision making.
-    IAMs are especially useful, because they identify solutions to achieve a climate target given a wide range of constraints and technological details.
+    IAMs are especially useful because they identify solutions to achieve a climate target given a wide range of constraints and technological details.
     As the usage of IAMs is mounting, critics point out that some of the reported trajectories, such as the speed of mitigation in certain regions or the scale up of certain technologies might not be feasible. For example, IAMs tend to place a majority
-    of climate mitigation actions in the regions outside of OECD+ and China+ as those have large techno-economic mitigation potential, as show in the figure below. <br />
+    of climate mitigation actions in regions outside of OECD+ and China+ as those have a large techno-economic mitigation potential. This is shown in the figure below. <br />
     </p>
         """
     , unsafe_allow_html=True)
@@ -529,7 +529,8 @@ with colm:
         ## Effects on short-term CO2 reduction
     
     <p class="body-font"> Let's now look at the difference between the conventional, cost-effective scenarios and the set of scenarios 
-    that consider institutional feasibility. The figure below shows the difference in CO2 emissions between these two scenarios.
+    that consider institutional feasibility. All scenarios aim to limit the increase of average global temperature to around +2C compared to pre-industrial times.
+    The figure below shows the difference in CO2 emissions between these two scenarios.
     Colored lines are the delta-values for each model, the black line is the median of all models.
     </p>
         """
@@ -644,7 +645,7 @@ subplots.update_yaxes(showticklabels=False, row=1, col=3,
                       tickfont=dict(size=font_size_axis))
 subplots.update_layout(
     title = go.layout.Title(
-        text="Difference of CO2 emissions <br><sup> between cost effective and feasibility constrained scenarios </sup>",
+        text="Difference of CO2 emissions to reach a 2C target <br><sup> between cost effective and feasibility constrained scenarios </sup>",
         x=0, 
         xanchor = 'left',
         yanchor = 'top',
@@ -695,7 +696,7 @@ with colm: # "&nbsp;" could be used to insert white spaces manually
         mitigation actions. Compared to the cost-effective scenarios, feasibility constraint scenarios require OECD90+ countries to reduce their
                CO2 emissions by additional 26% by 2040. </br> 
         \u2714 China+'s mitigation effort needs to increase from 2040 onwards.</br>
-         The country is expected to reduce around 10% more (median) of its CO2 emissions
+         The region is expected to reduce around 10% more (median) of its CO2 emissions
          until 2050 compared to a cost-effective scenario. </br>
         \u2714 The Rest of the World is expected to have lower CO2 reductions compared to a cost-effective scenario.
           CO2 emissions reductions in these regions are expected to be around 20% lower (median) when considering feasibility constraints.
