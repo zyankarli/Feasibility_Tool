@@ -123,9 +123,9 @@ df = get_data().data
 
 ##DATA WRANGLING
 #get regional groupings
-## OECD: "North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)"
+## OECD90+: "North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)"
 #TODO Clarify that countries of Asia and Latin America are missing
-## China:  Countries of centrally-planned Asia; primarily China
+## China+:  Countries of centrally-planned Asia; primarily China
 ## Rest of the world: other countries
 #get world
 world = df[df['region'] == "World"]
@@ -137,7 +137,7 @@ oecd = df[df["region"].isin(["North America; primarily the United States of Amer
 oecd['region'] = "OECD90+"
 #get China
 china = df[df['region'] == "Countries of centrally-planned Asia; primarily China"]
-china.loc[:, "region"] = "China"
+china.loc[:, "region"] = "China+"
 #get RoW
 row = df[~df["region"].isin(["World", "North America; primarily the United States of America and Canada","Eastern and Western Europe (i.e., the EU28)", "Pacific OECD", "Countries of centrally-planned Asia; primarily China"])]\
         .groupby(["model", "scenario", "variable", "year", "unit"])\
@@ -492,14 +492,14 @@ with colr:
             value = filter_df_world['model'].nunique(), 
             delta = '{cost_eff} cost effective / {feasi}  feasibility constrained'.format(cost_eff=n_cost_eff, feasi=n_feasi), 
             delta_color="off")          
-    st.metric('Reduction of coal comsumption by 2030', 
+    st.metric('Global reduction of coal comsumption by 2030', 
         value = str(round(100 - (float(st.session_state['coal_use_2030_world']) / \
                     round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Coal"].median())) *100))) + "%")
-    st.metric('Solar power increase by 2030', 
+    st.metric('Global solar power increase by 2030', 
             value = str(round(100 - (float(st.session_state['solar_use_2030_world']) / \
                         round(float(df[(df["year"] == 2020) & (df["region"] == "World")]["Secondary Energy|Electricity|Solar"].median())) *-100))) + "%")        
     #According to State of CDR report 2023, in 2020 only 2Mt CO2/yr were sequestered globally using CCS (DACCS and BECCS together)
-    st.metric('Fractional increase of global CCS deployment by 2050', 
+    st.metric('Global fractional increase of global CCS deployment by 2050', 
                         value = str(str(int(st.session_state['ccs_use_2050_world']/2)) + "x times more")) #TODO median absolute CCS deployment by 2050
 
 with coll:
@@ -508,7 +508,7 @@ with coll:
         st.plotly_chart(fig_world, theme="streamlit", config=config)
 
 
-coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+coll, colm, colr = st.columns([0.4, 0.6, 0.4])
 with colm:
     st.markdown("""
     ### Key takeaway for global CO2 reductions
@@ -522,7 +522,7 @@ unsafe_allow_html=True)
 st.markdown("""****""")
 
 
-coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+coll, colm, colr = st.columns([0.4, 0.6, 0.4])
 with colm:
     st.markdown(
         """	
@@ -546,7 +546,7 @@ to_plot = pd.pivot(data=to_plot, index=['model','region', "year"], columns = 'sc
 to_plot['delta'] = to_plot['T34_1000_bitb_em'] - to_plot['T34_1000_ref']
 
 #set order for plot
-region_order = ['OECD90+', 'China', 'RoW']
+region_order = ['OECD90+', 'China+', 'RoW']
 to_plot['region'] = pd.Categorical(to_plot['region'], categories=region_order)
 
 #drop rows with delta value of zero (only COFFEE)
@@ -562,7 +562,7 @@ median_df = to_plot.groupby(['year', 'region'])['delta'].median().reset_index()
 
 color_mapping = {
 'OECD90+': "rgb(255, 0, 0)",
-'China': "rgb(0, 255, 0)",
+'China+': "rgb(0, 255, 0)",
 'RoW': "rgb(0, 0, 255)"
 }
 
@@ -665,19 +665,19 @@ coll, colm, colr = st.columns([0.2, 0.6, 0.2])
 with colm:
     st.plotly_chart(subplots, theme="streamlit", config=config, use_container_width=True)
 
-coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+coll, colm, colr = st.columns([0.4, 0.6, 0.4])
 with colm:
     st.markdown(""" <p class="body-font"> <b>Feasibility-updated CO2 net-zero years:</b> </p>""", unsafe_allow_html=True)
 
 
-coll, colm1, colm2, colm3, colr = st.columns([0.3, 0.15, 0.15, 0.15, 0.2])
+coll, colm1, colm2, colm3, colr = st.columns([0.4, 0.2, 0.2, 0.2, 0.4])
 with colm1:
     st.metric("For OECD90+",
               value="2045",
               delta="5 years earlier",
               delta_color="inverse")
 with colm2:
-    st.metric("For China",
+    st.metric("For China+",
                 value="2050",
                 delta="10 years earlier",
                 delta_color="inverse")
@@ -685,20 +685,20 @@ with colm3:
     st.metric("For RoW",
                 value="2070")
 
-coll, colm, colr = st.columns([0.4, 0.6, 0.2])
-with colm:
+coll, colm, colr = st.columns([0.4, 0.6, 0.4])
+with colm: # "&nbsp;" could be used to insert white spaces manually
     st.markdown("""
     ### Key takeaways for regional CO2 emission reductions
 
     <p class="body-font"> 
         \u2714 OECD90+ countries are required to significantly increase their short term 
-        &nbsp; &nbsp; mitigation actions. Compared to the cost-effective scenarios, feasibility constraint scenarios require OECD90+ countries to reduce their
+        mitigation actions. Compared to the cost-effective scenarios, feasibility constraint scenarios require OECD90+ countries to reduce their
                CO2 emissions by additional 26% by 2040. </br> 
-        \u2714 China's mitigation effort needs to increase from 2040 onwards.</br>
-        &nbsp; &nbsp; The country is expected to reduce around 10% more (median) of its CO2 emissions
-        &nbsp; &nbsp; until 2050 compared to a cost-effective scenario. </br>
-        \u2714 The Rest of the World is expected to have lower CO2 reductions compared to a cost-effective scenario.</br>
-        &nbsp; &nbsp; CO2 emissions reductions in these regions are expected to be around 20% lower (median) when considering feasibility constraints.
+        \u2714 China+'s mitigation effort needs to increase from 2040 onwards.</br>
+         The country is expected to reduce around 10% more (median) of its CO2 emissions
+         until 2050 compared to a cost-effective scenario. </br>
+        \u2714 The Rest of the World is expected to have lower CO2 reductions compared to a cost-effective scenario.
+          CO2 emissions reductions in these regions are expected to be around 20% lower (median) when considering feasibility constraints.
         </p>
     """,
 unsafe_allow_html=True) 
@@ -706,7 +706,7 @@ unsafe_allow_html=True)
 
 st.markdown("""****""")
 
-coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+coll, colm, colr = st.columns([0.4, 0.6, 0.4])
 with colm:
     st.markdown(""" <br /> <br /> <br />""", unsafe_allow_html=True) 
     st.markdown("""
@@ -717,12 +717,12 @@ st.markdown("""****""")
 
 st.markdown(""" <br /> <br /> <br />""", unsafe_allow_html=True) 
 
-coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+coll, colm, colr = st.columns([0.4, 0.6, 0.4])
 with colm:
     st.markdown("## Publications")
     st.markdown(""" <p class = "body-font"> 
-            The presented results are based on scenario design as described in Bertram et al. (in preparation).</br>
-            The regional level figures and feasibility indicators are based on Brutschin et al. (in preparation) and Brutschin et al.(2021). </br>
+            The presented results are based on scenario design as described in Bertram et al. (in preparation).
+            The regional level figures and feasibility indicators are based on Brutschin et al. (in preparation) and Brutschin et al. (2021). </br>
             These papers as well as this web app are part of the <a href="https://iiasa.ac.at/projects/engage">international ENGAGE project</a> funded by the European Commission’s Horizon 2020 research and innovation programme under grant agreement No 821471. </p>""", unsafe_allow_html=True)
 
 coll, colm, colr = st.columns([0.5, 0.33, 0.33])
