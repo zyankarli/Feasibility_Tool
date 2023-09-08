@@ -529,7 +529,7 @@ with colm:
         ## Effects on short-term CO2 reduction
     
     <p class="body-font"> Let's now look at the difference between the conventional, cost-effective scenarios and the set of scenarios 
-    that consider institutional feasibility. All scenarios aim to limit the increase of average global temperature to around +2C compared to pre-industrial times.
+    that consider institutional feasibility. All scenarios aim to limit the increase of average global temperature to around 2C compared to pre-industrial times.
     The figure below shows the difference in CO2 emissions between these two scenarios.
     Colored lines are the delta-values for each model, the black line is the median of all models.
     </p>
