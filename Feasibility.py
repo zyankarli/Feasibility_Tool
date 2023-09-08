@@ -239,7 +239,7 @@ with colm:
         """
     , unsafe_allow_html=True)
 
-    engage_image = Image.open("data/ENGAGE_result.jpeg")
+    engage_image = Image.open("data/ENGAGE_result.png")
     st.image(engage_image,
              caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China+. \
              Those regions are expected to decrease their CO2 emissions by 68% until 2050 compared to 2020. More information on the regional grouping is provided below.") 
@@ -250,7 +250,7 @@ with colm:
     </p> """, unsafe_allow_html=True)
 st.markdown("""****""")
 
-coll, colm, colr = st.columns([0.4, 0.6, 0.2])
+coll, colm, colr = st.columns([0.4, 0.65, 0.2])
 with coll:
     st.markdown(
         """
