@@ -250,7 +250,7 @@ with colm:
     </p> """, unsafe_allow_html=True)
 st.markdown("""****""")
 
-coll, colm, colr = st.columns([0.4, 0.65, 0.2])
+coll, colm, colr = st.columns([0.4, 0.6, 0.2])
 with coll:
     st.markdown(
         """
