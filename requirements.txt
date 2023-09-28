@@ -1,3 +1,9 @@
 pyam-iamc==1.8.0
 pillow==9.5.0
 plotly==5.14.1
+google-auth>=1.23.0,<2
+gspread
+google
+gspread_dataframe
+gsheetsdb
+shillelagh

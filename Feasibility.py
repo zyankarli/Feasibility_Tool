@@ -7,7 +7,9 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 from PIL import Image
-
+from shillelagh.backends.apsw.db import connect
+from google.oauth2 import service_account
+import time
 
 st.set_page_config(
      page_title='Feasibility of climate mitigation scenarios',
@@ -730,3 +732,48 @@ coll, colm, colr = st.columns([0.5, 0.33, 0.33])
 with colm:
     ENGAGE_logo = Image.open("data/ENGAGE_logo.png")
     st.image(ENGAGE_logo)
+
+
+#-------------------------#
+# GOOGLE SHEET CONNECTION #
+#-------------------------#
+
+#prepare google sheet connection
+sheet_url = st.secrets["private_gsheets_url"]
+
+def create_connection():
+        credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"], 
+        scopes=["https://www.googleapis.com/auth/spreadsheets",],)
+        connection = connect(":memory:", adapter_kwargs={
+            "gsheetsapi" : { 
+            "service_account_info" : {
+                "type" : st.secrets["gcp_service_account"]["type"],
+                "project_id" : st.secrets["gcp_service_account"]["project_id"],
+                "private_key_id" : st.secrets["gcp_service_account"]["private_key_id"],
+                "private_key" : st.secrets["gcp_service_account"]["private_key"],
+                "client_email" : st.secrets["gcp_service_account"]["client_email"],
+                "client_id" : st.secrets["gcp_service_account"]["client_id"],
+                "auth_uri" : st.secrets["gcp_service_account"]["auth_uri"],
+                "token_uri" : st.secrets["gcp_service_account"]["token_uri"],
+                "auth_provider_x509_cert_url" : st.secrets["gcp_service_account"]["auth_provider_x509_cert_url"],
+                "client_x509_cert_url" : st.secrets["gcp_service_account"]["client_x509_cert_url"],
+                }
+            },
+        })
+        return connection.cursor()
+#------------------------------------------------------------------------------#
+
+
+feedback_question = st.text_input("Feed me feedback", placeholder="Please enter your feedback here", 
+                            key=1)
+timestamp = time.time()
+
+#Submit button; send data to google sheet
+submitted = st.form_submit_button("Click here to submit!")
+if submitted:
+    cursor = create_connection()
+    query = f'INSERT INTO "{sheet_url}" VALUES ("{feedback_question}", "{timestamp}")'
+    cursor.execute(query)
+    st.write("**:green[Submission successful. Thank you for your input!]**")
+    st.toast("**:green[Submission successful!]**", icon=None)
