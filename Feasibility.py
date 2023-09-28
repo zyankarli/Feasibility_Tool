@@ -26,7 +26,7 @@ hide_default_format = """
        </style>
        """
 #uncomment to hide menu and footer
-st.markdown(hide_default_format, unsafe_allow_html=True)
+#st.markdown(hide_default_format, unsafe_allow_html=True)
 
 #hide fullscreen button for plots
 hide_img_fs = '''
@@ -73,7 +73,7 @@ def get_data():
     #Home
     #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    pyam.iiasa.set_config(st.secrets['iiasa_creds']['username'], st.secrets['iiasa_creds']['password'])
+    pyam.iiasa.set_config(st.secrets['username'], st.secrets['password'])
     pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
@@ -241,10 +241,10 @@ with colm:
         """
     , unsafe_allow_html=True)
 
-    engage_image = Image.open("data/ENGAGE_result.png")
-    st.image(engage_image,
-             caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China+. \
-             Those regions are expected to decrease their CO2 emissions by 68% until 2050 compared to 2020. More information on the regional grouping is provided below.") 
+    # engage_image = Image.open("data/ENGAGE_result.png")
+    # st.image(engage_image,
+    #          caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China+. \
+    #          Those regions are expected to decrease their CO2 emissions by 68% until 2050 compared to 2020. More information on the regional grouping is provided below.") 
 
     st.markdown(""" <p class="body-font">
                  How would the results of IAMs change if feasibility constraints were taken into account? 
@@ -267,8 +267,8 @@ with coll:
     , unsafe_allow_html=True)
 with colm:
     #import images
-    regions_image = Image.open("data/IAM_regions.png")
-    st.image(regions_image)
+    # regions_image = Image.open("data/IAM_regions.png")
+    # st.image(regions_image)
     
     st.markdown(
         """
@@ -729,9 +729,9 @@ with colm:
             These papers as well as this web app are part of the <a href="https://iiasa.ac.at/projects/engage">international ENGAGE project</a> funded by the European Commission’s Horizon 2020 research and innovation programme under grant agreement No 821471. </p>""", unsafe_allow_html=True)
 
 coll, colm, colr = st.columns([0.5, 0.33, 0.33])
-with colm:
-    ENGAGE_logo = Image.open("data/ENGAGE_logo.png")
-    st.image(ENGAGE_logo)
+# with colm:
+#     ENGAGE_logo = Image.open("data/ENGAGE_logo.png")
+#     st.image(ENGAGE_logo)
 
 
 #-------------------------#
@@ -762,18 +762,19 @@ def create_connection():
             },
         })
         return connection.cursor()
+
 #------------------------------------------------------------------------------#
 
+with st.form("Feedback Form"):
+    feedback_question = st.text_input("Feed me feedback", placeholder="Please enter your feedback here", 
+                                key=1)
+    timestamp = time.time()
 
-feedback_question = st.text_input("Feed me feedback", placeholder="Please enter your feedback here", 
-                            key=1)
-timestamp = time.time()
-
-#Submit button; send data to google sheet
-submitted = st.form_submit_button("Click here to submit!")
-if submitted:
-    cursor = create_connection()
-    query = f'INSERT INTO "{sheet_url}" VALUES ("{feedback_question}", "{timestamp}")'
-    cursor.execute(query)
-    st.write("**:green[Submission successful. Thank you for your input!]**")
-    st.toast("**:green[Submission successful!]**", icon=None)
+    #Submit button; send data to google sheet
+    submitted = st.form_submit_button("Click here to submit!")
+    if submitted:
+        cursor = create_connection()
+        query = f'INSERT INTO "{sheet_url}" VALUES ("{feedback_question}", "{timestamp}")'
+        cursor.execute(query)
+        st.write("**:green[Submission successful. Thank you for your input!]**")
+        st.toast("**:green[Submission successful!]**", icon=None)
