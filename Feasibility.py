@@ -706,16 +706,6 @@ with colm: # "&nbsp;" could be used to insert white spaces manually
     """,
 unsafe_allow_html=True) 
 
-
-st.markdown("""****""")
-
-coll, colm, colr = st.columns([0.4, 0.6, 0.4])
-with colm:
-    st.markdown(""" <br /> <br /> <br />""", unsafe_allow_html=True) 
-    st.markdown("""
-    <p class = "body-font"> Implications of those findings for temperature/ climate goals will be added soon. </p>
-    """,unsafe_allow_html=True)
-
 st.markdown("""****""")
 
 st.markdown(""" <br /> <br /> <br />""", unsafe_allow_html=True) 
