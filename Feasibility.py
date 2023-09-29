@@ -69,18 +69,18 @@ st.write(
 def get_data():
     #get IIASA identification
     #IIASA
-    iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
+    #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
     #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    #pyam.iiasa.set_config(st.secrets['username'], st.secrets['password'])
-    #pyam.iiasa.Connection()
+    pyam.iiasa.set_config(st.secrets['username'], st.secrets['password'])
+    pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        creds = iiasa_creds,
+        #creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
