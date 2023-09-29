@@ -266,7 +266,6 @@ with coll:
     """
     , unsafe_allow_html=True)
 with colm:
-    import images
     regions_image = Image.open("data/IAM_regions.png")
     st.image(regions_image)
     
