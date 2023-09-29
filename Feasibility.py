@@ -69,18 +69,18 @@ st.write(
 def get_data():
     #get IIASA identification
     #IIASA
-    #iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
+    iiasa_creds = r"C:\Users\scheifinger\Documents\GitHub\Feasibility_Tool\iiasa_credentials.yml" 
     #Home
     #iiasa_creds = r"C:\Users\schei\OneDrive\Dokumente\GitHub\Feasibility_Tool\iiasa_credentials.yml"
     #Online // also comment out creds = iiasa_creds in read_iiasa below
-    pyam.iiasa.set_config(st.secrets['username'], st.secrets['password'])
-    pyam.iiasa.Connection()
+    #pyam.iiasa.set_config(st.secrets['username'], st.secrets['password'])
+    #pyam.iiasa.Connection()
 
     #connections = list(pyam.iiasa.Connection(creds=iiasa_creds).valid_connections)
     #query for climate scenario data
     df = pyam.read_iiasa(
         name = 'engage_internal',
-        #creds = iiasa_creds,
+        creds = iiasa_creds,
         scenario =[
             "T34_1000_ref",
             "T34_1000_govem",
@@ -241,10 +241,10 @@ with colm:
         """
     , unsafe_allow_html=True)
 
-    # engage_image = Image.open("data/ENGAGE_result.png")
-    # st.image(engage_image,
-    #          caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China+. \
-    #          Those regions are expected to decrease their CO2 emissions by 68% until 2050 compared to 2020. More information on the regional grouping is provided below.") 
+    engage_image = Image.open("data/ENGAGE_result.png")
+    st.image(engage_image,
+             caption = "Cost effective scenarios place a large share of global climate mitigation action in world regions outside OECD90+ and China+. \
+             Those regions are expected to decrease their CO2 emissions by 68% until 2050 compared to 2020. More information on the regional grouping is provided below.") 
 
     st.markdown(""" <p class="body-font">
                  How would the results of IAMs change if feasibility constraints were taken into account? 
@@ -266,9 +266,9 @@ with coll:
     """
     , unsafe_allow_html=True)
 with colm:
-    #import images
-    # regions_image = Image.open("data/IAM_regions.png")
-    # st.image(regions_image)
+    import images
+    regions_image = Image.open("data/IAM_regions.png")
+    st.image(regions_image)
     
     st.markdown(
         """
@@ -708,7 +708,7 @@ unsafe_allow_html=True)
 
 st.markdown("""****""")
 
-st.markdown(""" <br /> <br /> <br />""", unsafe_allow_html=True) 
+#st.markdown(""" <br /> <br /> <br />""", unsafe_allow_html=True) 
 
 coll, colm, colr = st.columns([0.4, 0.6, 0.4])
 with colm:
@@ -719,11 +719,11 @@ with colm:
             These papers as well as this web app are part of the <a href="https://iiasa.ac.at/projects/engage">international ENGAGE project</a> funded by the European Commission’s Horizon 2020 research and innovation programme under grant agreement No 821471. </p>""", unsafe_allow_html=True)
 
 coll, colm, colr = st.columns([0.5, 0.33, 0.33])
-# with colm:
-#     ENGAGE_logo = Image.open("data/ENGAGE_logo.png")
-#     st.image(ENGAGE_logo)
+with colm:
+    ENGAGE_logo = Image.open("data/ENGAGE_logo.png")
+    st.image(ENGAGE_logo)
 
-
+st.markdown("""****""")
 #-------------------------#
 # GOOGLE SHEET CONNECTION #
 #-------------------------#
@@ -755,16 +755,24 @@ def create_connection():
 
 #------------------------------------------------------------------------------#
 
-with st.form("Feedback Form"):
-    feedback_question = st.text_input("Feed me feedback", placeholder="Please enter your feedback here", 
-                                key=1)
-    timestamp = time.time()
+coll, colm, colr = st.columns([0.4, 0.6, 0.4])
+with colm:
+    st.markdown("## Feedback")
+    st.markdown(""" <p class = "body-font">
+                What do you think about this online application? Any suggestions for improvement? Any unanswered questions?
+                Please let us know by filling out the feedback form below. 
+            </p>""", unsafe_allow_html=True)
 
-    #Submit button; send data to google sheet
-    submitted = st.form_submit_button("Click here to submit!")
-    if submitted:
-        cursor = create_connection()
-        query = f'INSERT INTO "{sheet_url}" VALUES ("{feedback_question}", "{timestamp}")'
-        cursor.execute(query)
-        st.write("**:green[Submission successful. Thank you for your input!]**")
-        st.toast("**:green[Submission successful!]**", icon=None)
+    with st.form("Feedback Form"):
+        feedback_question = st.text_area("", placeholder="Please enter your feedback here", 
+                                    height=200,key=1)
+        timestamp = str(time.time())
+
+        #Submit button; send data to google sheet
+        submitted = st.form_submit_button("Click here to submit!")
+        if submitted:
+            cursor = create_connection()
+            query = f'INSERT INTO "{sheet_url}" VALUES ("{feedback_question}", "{timestamp}")'
+            cursor.execute(query)
+            st.write("**:green[Submission successful. Thank you for your input!]**")
+            st.toast("**:green[Submission successful!]**", icon=None)
