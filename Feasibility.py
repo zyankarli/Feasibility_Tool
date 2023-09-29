@@ -758,8 +758,7 @@ coll, colm, colr = st.columns([0.4, 0.6, 0.4])
 with colm:
     st.markdown("## Feedback")
     st.markdown(""" <p class = "body-font">
-                What do you think about this online application? Any suggestions for improvement? Any unanswered questions?
-                Please let us know by filling out the feedback form below. 
+              Please submit here any feedback you might have on the displayed scenarios or the tool: 
             </p>""", unsafe_allow_html=True)
 
     with st.form("Feedback Form"):
