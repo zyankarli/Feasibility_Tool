@@ -667,7 +667,10 @@ subplots.update_layout(
     height=800,  # Change this value to your desired height in pixels
     width=1200   # Change this value to your desired width in pixels
     )
-
+#Deactivate zooming functionality
+for i in range(1, len(region_order)+1):
+    subplots.layout[f"xaxis{i}"].fixedrange = True
+    subplots.layout[f"yaxis{i}"].fixedrange = True
 
 
 coll, colm, colr = st.columns([0.2, 0.6, 0.2])
