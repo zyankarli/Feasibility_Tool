@@ -594,10 +594,7 @@ for i, region in enumerate(region_order, 1):
             row=1,
             col=i
         )
-        #Deactivate zooming functionality
-        subplots.layout.xaxis.fixedrange = True
-        subplots.layout.yaxis.fixedrange = True
-        
+
     subplots.add_trace(
         go.Scatter(
         x=median_df[median_df['region'] == region]['year'],
@@ -665,12 +662,10 @@ subplots.update_layout(
     #     itemsizing="constant"
     # ),
     height=800,  # Change this value to your desired height in pixels
-    width=1200   # Change this value to your desired width in pixels
+    width=1200,   # Change this value to your desired width in pixels
+    config={'scrollZoom': False}
     )
-#Deactivate zooming functionality
-for i in range(1, len(region_order)+1):
-    subplots.layout[f"xaxis{i}"].fixedrange = True
-    subplots.layout[f"yaxis{i}"].fixedrange = True
+
 
 
 coll, colm, colr = st.columns([0.2, 0.6, 0.2])
