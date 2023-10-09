@@ -458,9 +458,7 @@ else:
             fig_world.add_trace(scatter_trace, row=1, col=i + 1)
             # Set tickfont for xaxis
             fig_world.update_xaxes(tickfont=dict(size=font_size_axis), row=1, col=i + 1)
-            #Deactivate zooming functionality
-            fig_world.layout.xaxis.fixedrange = True
-            fig_world.layout.yaxis.fixedrange = True
+
 
     fig_world.update_layout(
         title = go.layout.Title(
