@@ -458,7 +458,9 @@ else:
             fig_world.add_trace(scatter_trace, row=1, col=i + 1)
             # Set tickfont for xaxis
             fig_world.update_xaxes(tickfont=dict(size=font_size_axis), row=1, col=i + 1)
-            #
+            #Deactivate zooming functionality
+            fig_world.layout.xaxis.fixedrange = True
+            fig_world.layout.yaxis.fixedrange = True
 
     fig_world.update_layout(
         title = go.layout.Title(
@@ -478,9 +480,7 @@ else:
         height=600,  # Change this value to your desired height in pixels
         width=1000   # Change this value to your desired width in pixels
     )
-    #Deactivate zooming functionality
-    fig_world.layout.xaxis.fixedrange = True
-    fig_world.layout.yaxis.fixedrange = True
+
 
 coll, colm, colr = st.columns([0.6, 0.1, 0.25], gap="small")
 
@@ -594,6 +594,10 @@ for i, region in enumerate(region_order, 1):
             row=1,
             col=i
         )
+        #Deactivate zooming functionality
+        subplots.layout.xaxis.fixedrange = True
+        subplots.layout.yaxis.fixedrange = True
+        
     subplots.add_trace(
         go.Scatter(
         x=median_df[median_df['region'] == region]['year'],
@@ -663,9 +667,7 @@ subplots.update_layout(
     height=800,  # Change this value to your desired height in pixels
     width=1200   # Change this value to your desired width in pixels
     )
-#Deactivate zooming functionality
-subplots.layout.xaxis.fixedrange = True
-subplots.layout.yaxis.fixedrange = True
+
 
 
 coll, colm, colr = st.columns([0.2, 0.6, 0.2])
