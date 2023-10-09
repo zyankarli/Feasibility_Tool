@@ -478,6 +478,9 @@ else:
         height=600,  # Change this value to your desired height in pixels
         width=1000   # Change this value to your desired width in pixels
     )
+    #Deactivate zooming functionality
+    fig_world.layout.xaxis.fixedrange = True
+    fig_world.layout.yaxis.fixedrange = True
 
 coll, colm, colr = st.columns([0.6, 0.1, 0.25], gap="small")
 
@@ -660,7 +663,9 @@ subplots.update_layout(
     height=800,  # Change this value to your desired height in pixels
     width=1200   # Change this value to your desired width in pixels
     )
-
+#Deactivate zooming functionality
+subplots.layout.xaxis.fixedrange = True
+subplots.layout.yaxis.fixedrange = True
 
 
 coll, colm, colr = st.columns([0.2, 0.6, 0.2])
