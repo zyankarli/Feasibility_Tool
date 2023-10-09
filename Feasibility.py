@@ -662,8 +662,8 @@ subplots.update_layout(
     #     itemsizing="constant"
     # ),
     height=800,  # Change this value to your desired height in pixels
-    width=1200,   # Change this value to your desired width in pixels
-    config={'scrollZoom': False}
+    width=1200  # Change this value to your desired width in pixels
+
     )
 
 
